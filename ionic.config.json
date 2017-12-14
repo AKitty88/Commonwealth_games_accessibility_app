@@ -1,0 +1,8 @@
+{
+  "name": "Access-GC-2.0",
+  "app_id": "7dd71291",
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
+}
