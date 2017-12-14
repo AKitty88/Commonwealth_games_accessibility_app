@@ -7,4 +7,5 @@ For all your accessibility toilet, parking and facility-access needs.
 - National Public Toilet Map (Department of Social Services) updated December 5th, 2017.
 - Pram Ramps (City of Gold Coast) updated as of June 2015.
 - Public Parking Facilities (City of Gold Coast) updated as of June 2015.
+
 Datasets publicly available on https://data.gov.au/
