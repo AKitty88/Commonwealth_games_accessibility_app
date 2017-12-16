@@ -20,8 +20,8 @@ export class HomePage {
   @ViewChild('map') mapElement: ElementRef;
   map: GoogleMap;
 
-  constructor(public navCtrl: NavController, 
-              private _googleMaps: GoogleMaps) {
+  // - DEPRECATED FIXED: `private _googleMaps: GoogleMaps` no longer needed in constructor 
+  constructor(public navCtrl: NavController) {
     // 
 
   }
@@ -38,7 +38,8 @@ ngAfterViewInit() {
 // Create the map element for view.
 initMap() {
   let element = this.mapElement.nativeElement; // last resort?
-  this.map = this._googleMaps.create(element);
+  this.map = GoogleMaps.create(element);      // - DEPRECATED FIXED: this.map = this._googleMaps.create(element);
+
 }
   // ionViewDidLoad() {
 
