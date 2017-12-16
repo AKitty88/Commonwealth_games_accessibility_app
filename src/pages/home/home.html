@@ -13,6 +13,19 @@
   <p>
     If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will show you the way.
   </p>
-
+<!-- - TODO: Replace menu/header with floating buttons based on UI revisions -->
   <button ion-button secondary menuToggle>Toggle Menu</button>
+<h2>Is there a FABulous button floating around here somewhere?</h2>
+<ion-fab bottom right >
+  <button ion-fab>Share</button>
+  <ion-fab-list side="top">
+    <button ion-fab>Facebook</button>
+    <button ion-fab>Twitter</button>
+    <button ion-fab>Youtube</button>
+  </ion-fab-list>
+  <ion-fab-list side="left">
+    <button ion-fab>Vimeo</button>
+  </ion-fab-list>
+</ion-fab>
+
 </ion-content>

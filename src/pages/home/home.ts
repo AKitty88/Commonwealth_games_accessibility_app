@@ -29,9 +29,13 @@ export class HomePage {
 // - FIXME: ngAfterViewInit() vs ionViewDidLoad()
 // @ViewChild('map') may not yet be available in ionViewDidLoad lifecycle hook.
 ngAfterViewInit() {
+
   this.initMap();
+
+  // setup
 }
 
+// Create the map element for view.
 initMap() {
   let element = this.mapElement.nativeElement; // last resort?
   this.map = this._googleMaps.create(element);
