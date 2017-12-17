@@ -3,7 +3,7 @@
     <name>Access-GC-2.0</name>
     <description>An awesome Ionic/Cordova app.</description>
     <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
-    <content original-src="index.html" src="http://192.168.0.2:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -78,10 +78,6 @@
     </platform>
     <allow-navigation href="http://192.168.0.2:8100" />
     <engine name="android" spec="6.3.0" />
-    <plugin name="cordova-plugin-googlemaps" spec="^2.1.1">
-        <variable name="API_KEY_FOR_ANDROID" value="AIzaSyD6T8U3Ptzz_4CeS3okCrD_YqcpLH8W-TI" />
-        <variable name="API_KEY_FOR_IOS" value="AIzaSyDU8b_dT9gf_Md1A1KHuB1CBtJpz5EYEs0" />
-    </plugin>
     <plugin name="ionic-plugin-keyboard" spec="^2.2.1" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <plugin name="cordova-plugin-device" spec="^1.1.4" />
@@ -89,4 +85,8 @@
     <plugin name="cordova-plugin-ionic-webview" spec="^1.1.16" />
     <plugin name="cordova-plugin-geolocation" spec="^3.0.0" />
     <plugin name="cordova-plugin-statusbar" spec="^2.3.0" />
+    <plugin name="cordova-plugin-googlemaps" spec="git+https://github.com/mapsplugin/cordova-plugin-googlemaps.git">
+        <variable name="API_KEY_FOR_ANDROID" value="AIzaSyDFpfzphD451gTriAfBdOck3lIluvxv1bM" />
+        <variable name="API_KEY_FOR_IOS" value="AIzaSyDU8b_dT9gf_Md1A1KHuB1CBtJpz5EYEs0" />
+    </plugin>
 </widget>
