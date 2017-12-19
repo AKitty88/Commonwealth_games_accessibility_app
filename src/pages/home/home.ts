@@ -37,7 +37,7 @@ export class HomePage {
   }
 
   // - FIXME: ngAfterViewInit() vs ionViewDidLoad()
-  // @ViewChild('map') may not yet be available in ionViewDidLoad lifecycle hook.
+  // @ViewChild('map') maygit pul not yet be available in ionViewDidLoad lifecycle hook.
   ngAfterViewInit() {
     console.log("ngAfterViewInit:: ");
 
