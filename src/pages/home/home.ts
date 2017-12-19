@@ -52,6 +52,8 @@ export class HomePage {
   // Create the map element for view.
   loadMap() {
     console.log("loadMap:: ");
+
+    // Setup GoogleMaps view settings.
     let mapOptions: GoogleMapOptions = {
       'controls': {
         'compass': true,
@@ -70,37 +72,37 @@ export class HomePage {
 
     let element = this.mapElement.nativeElement;            // last resort?
     this.map = GoogleMaps.create(element, mapOptions);      // - DEPRECATED FIXED: this.map = this._googleMaps.create(element);
-    console.log("loadMap:: GoogleMap element created");
+    console.log("loadMap:: GoogleMaps element created");
 
     // Check map is ready before using any methods.
     this.map.one(GoogleMapsEvent.MAP_READY)
       .then(() => {
         console.log("loadMap:: GoogleMaps READY");
+        
+        // Populate the map view
         this.loadMarkers();
       })
       
 
+    /*
+      var options = {
+        'camera': {
+          'target': this.dummyData()[0].position,
+          'zoom': 3
+        }
+      };
 
-
-    // Populate the map view
-
-    // var options = {
-    //   'camera': {
-    //     'target': this.dummyData()[0].position,
-    //     'zoom': 3
-    //   }
-    // };
-
-    // this.map.addMarkerCluster({
-    //   boundsDraw: true,
-    //   markers: this.dummyData(),
-    //   icons: [
-    //     { min: 2, max: 100, url: "./img/blue.png", anchor: { x: 16, y: 16 } },
-    //     { min: 100, max: 1000, url: "./img/yellow.png", anchor: { x: 16, y: 16 } },
-    //     { min: 1000, max: 2000, url: "./img/purple.png", anchor: { x: 24, y: 24 } },
-    //     { min: 2000, url: "./img/red.png", anchor: { x: 32, y: 32 } }
-    //   ]
-    // })
+      this.map.addMarkerCluster({
+        boundsDraw: true,
+        markers: this.dummyData(),
+        icons: [
+          { min: 2, max: 100, url: "./img/blue.png", anchor: { x: 16, y: 16 } },
+          { min: 100, max: 1000, url: "./img/yellow.png", anchor: { x: 16, y: 16 } },
+          { min: 1000, max: 2000, url: "./img/purple.png", anchor: { x: 24, y: 24 } },
+          { min: 2000, url: "./img/red.png", anchor: { x: 32, y: 32 } }
+        ]
+      })
+    */
 
   }
 
@@ -108,8 +110,9 @@ export class HomePage {
   // }
   loadMarkers() {
     console.log("loadMarkers:: ");
-    //const locations: any[] = this.dummyData();
+    // const locations: any[] = this.dummyData();
 
+    // 
     var region = this.map.getVisibleRegion();
         console.log("region is" + region);
         var topLat = region.northeast.lat;
@@ -165,7 +168,7 @@ export class HomePage {
 
 
             if (parseInt(i) == data.length - 1)
-              console.log("hello");
+              console.log("byebye");                    // hello
 
           }
 
@@ -188,7 +191,7 @@ export class HomePage {
                 marker.on(GoogleMapsEvent.MARKER_CLICK)
                   .subscribe(() => {
                     marker.showInfoWindow();
-                    alert('Marker clicked title:' + marker.getTitle());
+                    alert('Marker clicked title:' + marker.getTitle() + marker.getPosition());
                   });
               });
           }
@@ -244,5 +247,48 @@ export class HomePage {
     //       });
     //   });
     console.log("loadMarkers:: markers added.");
+  }
+
+
+  /**
+   * doClusterer:
+   * @description: Don't need mathematically precise clustering. Just some way of consolidating markers to avoid noise:
+   * Avoid overlapping markers
+   * 
+   * @param: markersData
+   * @argument: markersData:
+   * - markersData: array of markers with an attribute (key-value) of 'pos' of type LatLng.
+   * Naive grid-based clustering? O(n) time?
+   * 2006 Google Maps Hacks #69: 
+   */
+  // Don't need mathematically precise clustering.
+  // Just some way of consolidating markers to avoid noise:
+  // - overlapping markers
+  // - 
+  // -
+  // 
+  doClusterer(markersData, 
+              /*view and grid cell bounds*/ 
+              topLat, botLat, 
+              leftLong, rightLong, 
+              gridsize, numCategories){
+    // Check limit granularity of pie chart categories display.
+    // just process data array to determine categories? data structures? pre-sort? count the distribution.
+    // 
+    var clusters = [];
+    
+    // Assign each point to a cluster based on grid cell height and width
+    for (let i in markersData) {
+      var col = 
+
+    }
+
+    // Combine adjacent clusters into 'superclusters'. Assume points are naturally clustered.
+    
+    // 1. sort list of clusters based on number of points descending.
+
+    // 2. Iterate list of clusters, looking at eight adjacent cells
+
+    
   }
 
