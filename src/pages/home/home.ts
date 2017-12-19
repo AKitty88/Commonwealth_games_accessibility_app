@@ -48,6 +48,7 @@ export class HomePage {
     // setup
   }
 
+  // - MARK: Map functions.
   // Create the map element for view.
   loadMap() {
     console.log("loadMap:: ");
@@ -76,8 +77,6 @@ export class HomePage {
       .then(() => {
         console.log("loadMap:: GoogleMaps READY");
         this.loadMarkers();
-        
-
       })
       
 
@@ -146,8 +145,12 @@ export class HomePage {
               'added': false,
               'id': i
             })
-            // Don't worry about updating markers on slide/zoom events #issue
-            if (long >= leftLong && long <= rightLong && lat >= botLat && lat <= topLat) {
+            // Don't worry about updating markers on slide/zoom events #issue **MarkerClustering first**.
+            // 
+            if (long >= leftLong && 
+                long <= rightLong && 
+                lat >= botLat && 
+                lat <= topLat) {
               let pos: LatLng = new LatLng(lat, long);
               //console.log("marker puuuush ----)");
               markers.push({
@@ -193,7 +196,7 @@ export class HomePage {
         });
 
 
-    // 
+    // addMarker async faster than for loop
     // console.log(locations[1].phone);
     // let baseArray: BaseArrayClass<any> = new BaseArrayClass<any>(locations);
     // baseArray.mapAsync((mOption: any, callback: (marker: Marker) => void) => {
