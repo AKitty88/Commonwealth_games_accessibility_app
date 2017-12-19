@@ -1,3 +1,7 @@
+import { HttpModule } from '@angular/http';
+
+
+import { jsonFileLoader } from './../services/jsonFileLoader';
 import { Component, ViewChild } from '@angular/core';
 import { Nav, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';

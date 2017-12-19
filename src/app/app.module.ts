@@ -1,6 +1,7 @@
+import { HttpModule, Response } from '@angular/http';
+import { jsonFileLoader } from './../services/jsonFileLoader';
 
 import { GoogleMaps } from '@ionic-native/google-maps';
-
 
 import { BrowserModule } from '@angular/platform-browser';
 import { ErrorHandler, NgModule } from '@angular/core';
@@ -12,6 +13,7 @@ import { ListPage } from '../pages/list/list';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
+import { ConnectionBackend } from '@angular/http/src/interfaces';
 
 @NgModule({
   declarations: [
@@ -22,6 +24,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
   imports: [
     BrowserModule,
     IonicModule.forRoot(MyApp),
+    HttpModule // oops
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -31,6 +34,8 @@ import { SplashScreen } from '@ionic-native/splash-screen';
   ],
   providers: [
     GoogleMaps,
+    jsonFileLoader,
+    HttpModule,
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler}

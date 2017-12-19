@@ -1,3 +1,4 @@
+import { jsonFileLoader } from './../../services/jsonFileLoader';
 
 import {
   GoogleMaps,
@@ -8,7 +9,11 @@ import {
   MarkerOptions,
   Marker,
   MarkerCluster,
+  BaseArrayClass,
+  LatLng
 } from '@ionic-native/google-maps';
+
+
 import { Platform } from 'ionic-angular';
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
@@ -22,9 +27,12 @@ export class HomePage {
   @ViewChild('map') mapElement: ElementRef;
   map: GoogleMap;
 
+
   // - DEPRECATED FIXED: `private _googleMaps: GoogleMaps` no longer needed in constructor 
-  constructor(public navCtrl: NavController, public platform: Platform) {
-    // 
+  constructor(public navCtrl: NavController,
+    public platform: Platform,
+    public JsonFileLoader: jsonFileLoader) {
+    //
     console.log("Constructed");
   }
 
@@ -48,14 +56,14 @@ export class HomePage {
         'compass': true,
         'myLocationButton': true,
         'indoorPicker': true,
-        'zoom': true // Only for Android
+        'zoom': true // Only for Android?
       },
       camera: {
         target: {
           lat: -27.9623464,
           lng: 153.3880684
         },
-        zoom: 18,
+        zoom: 8,
         tilt: 30
       }
     };
@@ -69,34 +77,161 @@ export class HomePage {
       .then(() => {
         console.log("loadMap:: GoogleMaps READY");
         this.loadMarkers();
+        var region = this.map.getVisibleRegion();
+        console.log("region is" + region);
+        var topLat = region.northeast.lat;
+        var botLat = region.southwest.lat;
+        var leftLong = region.southwest.lng;
+        var rightLong = region.northeast.lng;
+
+        let pos: LatLng = new LatLng(0, 0);
+        var markers = [];
+
+
+        this.JsonFileLoader.getData().subscribe((data) => {
+
+          data = data.features;
+          for (let i in data) {
+            // console.log(data[i].geometry.coordinates[0]);
+            var count = 0;
+            var lat = 0;
+            var long = 0;
+            for (let j in data[i].geometry.coordinates[0]) {
+              count++;
+              long += data[i].geometry.coordinates[0][j][0];
+              lat += data[i].geometry.coordinates[0][j][1];
+            }
+            lat = lat / count;
+            long = long / count;
+
+            markers.push({
+              'pos': pos,
+              'type': 1,
+              'close': [],
+              'added': false,
+              'id': i
+            })
+            // ? region bounds different? not working
+            if (long >= leftLong && long <= rightLong && lat >= botLat && lat <= topLat) {
+              let pos: LatLng = new LatLng(lat, long);
+              console.log("marker puuuush ----)");
+              markers.push({
+                'pos': pos,
+                'type': 1,
+                'close': [],
+                'added': false,
+                'id': i
+              })
+
+            }
+
+
+            if (parseInt(i) == data.length - 1)
+              console.log("hello");
+
+          }
+
+          for (let i in markers) {
+            console.log(i, " in marker");
+            let markerOptions2: MarkerOptions = {
+              position: markers[i].pos,
+              title: "Fatal",
+              icon: "red"
+            }
+
+            // this.map.fromLatLngToPoint(markers[i].pos, function (data) {
+            //   console.log(data);
+            //
+            //   //add markers that are close
+            // })
+
+            this.map.addMarker(markerOptions2)
+              .then((marker: Marker) => {
+                marker.on(GoogleMapsEvent.MARKER_CLICK)
+                  .subscribe(() => {
+                    marker.showInfoWindow();
+                    alert('Marker clicked title:' + marker.getTitle());
+                  });
+              });
+          }
+          this.map.addMarker({
+            title: 'Commonwealth Games Villagedgdfgdf',
+            snippet: "The Cozzmmonwealth Games Village (CGV) and the redevelopment of Parklands, Southport is one of the largest urban renewal projects ever undertaken on the Gold Coast.",
+            icon: 'blue',
+            animation: 'DROP',
+            position: {
+              lat: -28.9623464,
+              lng: 154.3880684
+            }
+          }).then((marker: Marker) => {
+      
+            //marker.showInfoWindow();// Show info window by default
+            marker.on(GoogleMapsEvent.MARKER_CLICK)
+              .subscribe(() => {
+                //marker.showInfoWindow();
+                alert('Marker clicked title:' + marker.getTitle());
+              });
+      
+          });
+
+        });
 
       })
 
 
+
+
     // Populate the map view
 
-    var options = {
-      'camera': {
-        'target': this.dummyData()[0].position,
-        'zoom': 12
-      }
-    };
-    
-    this.map.addMarkerCluster({
-      boundsDraw: true,
-      markers: this.dummyData(),
-      icons: [
-        {min: 2, max: 100, url: "./img/blue.png", anchor: {x: 16, y: 16}},
-        {min: 100, max: 1000, url: "./img/yellow.png", anchor: {x: 16, y: 16}},
-        {min: 1000, max: 2000, url: "./img/purple.png", anchor: {x: 24, y: 24}},
-        {min: 2000, url: "./img/red.png",anchor: {x: 32,y: 32}}
-      ]
-    })
+    // var options = {
+    //   'camera': {
+    //     'target': this.dummyData()[0].position,
+    //     'zoom': 3
+    //   }
+    // };
+
+    // this.map.addMarkerCluster({
+    //   boundsDraw: true,
+    //   markers: this.dummyData(),
+    //   icons: [
+    //     { min: 2, max: 100, url: "./img/blue.png", anchor: { x: 16, y: 16 } },
+    //     { min: 100, max: 1000, url: "./img/yellow.png", anchor: { x: 16, y: 16 } },
+    //     { min: 1000, max: 2000, url: "./img/purple.png", anchor: { x: 24, y: 24 } },
+    //     { min: 2000, url: "./img/red.png", anchor: { x: 32, y: 32 } }
+    //   ]
+    // })
 
   }
 
+  // ionViewDidLoad() {}
+  // }
   loadMarkers() {
     console.log("loadMarkers:: ");
+    //const locations: any[] = this.dummyData();
+
+
+
+
+
+    //console.log(locations[1].phone);
+    // let baseArray: BaseArrayClass<any> = new BaseArrayClass<any>(locations);
+    // baseArray.mapAsync((mOption: any, callback: (marker: Marker) => void) => {
+    //   this.map.addMarker(mOption).then(callback);
+
+
+    // }).then((markers: Marker[]) => {
+    //   console.log(markers[0].get("address"));
+
+
+
+    // }
+    //   );
+
+    // locations.forEach(element => {
+    //   this.map.addMarker(element);
+    //   console.log("hi");
+    // });
+
     this.map.addMarker({
       title: 'Commonwealth Games Village',
       snippet: "The Commonwealth Games Village (CGV) and the redevelopment of Parklands, Southport is one of the largest urban renewal projects ever undertaken on the Gold Coast.",
@@ -107,15 +242,16 @@ export class HomePage {
         lng: 153.3880684
       }
     }).then((marker: Marker) => {
-      
+
       //marker.showInfoWindow();// Show info window by default
       marker.on(GoogleMapsEvent.MARKER_CLICK)
-          .subscribe(() => {
-            //marker.showInfoWindow();
-            alert('Marker clicked title:' + marker.getTitle());
-          });
+        .subscribe(() => {
+          //marker.showInfoWindow();
+          alert('Marker clicked title:' + marker.getTitle());
+        });
 
     });
+
     //   .then(marker => {
     //     marker.on(GoogleMapsEvent.MARKER_CLICK)
     //       .subscribe(() => {
@@ -123,10 +259,9 @@ export class HomePage {
     //         //alert('clicked');
     //       });
     //   });
+    console.log("loadMarkers:: markers added.");
   }
-  // ionViewDidLoad() {
 
-  // }
 
 
   dummyData() {
@@ -139,7 +274,7 @@ export class HomePage {
         "name": "Starbucks - HI - Aiea  03641",
         "address": "Aiea Shopping Center_99-115 Aiea Heights Drive #125_Aiea, Hawaii 96701",
         "phone": "808-484-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -149,7 +284,7 @@ export class HomePage {
         "name": "Starbucks - HI - Aiea  03642",
         "address": "Pearlridge Center_98-125 Kaonohi Street_Aiea, Hawaii 96701",
         "phone": "808-484-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -159,7 +294,7 @@ export class HomePage {
         "name": "Starbucks - HI - Aiea  03643",
         "address": "Stadium Marketplace_4561 Salt Lake Boulevard_Aiea, Hawaii 96818",
         "phone": "808-488-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -169,7 +304,7 @@ export class HomePage {
         "name": "Starbucks - HI - Aiea  03644",
         "address": "Pearlridge Mall_98-1005 Moanalua Road_Aiea, Hawaii 96701",
         "phone": "808-484-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -179,17 +314,19 @@ export class HomePage {
         "name": "Starbucks - HI - Haleiwa  03645",
         "address": "Pupukea_59-720 Kamehameha Highway_Haleiwa, Hawaii 96712",
         "phone": "808-638-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
           "lat": 19.699335,
           "lng": -155.06566
         },
+
         "name": "Starbucks - HI - Hilo  03646",
         "address": "Border Waiakea Center_315-325 Makaala Street_Hilo, Hawaii 96720",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
+
       {
         "position": {
           "lat": 19.698399,
@@ -198,7 +335,7 @@ export class HomePage {
         "name": "Starbucks - HI - Hilo  03647",
         "address": "Prince Kuhio Plaza_111 East Puainako Street_Hilo, Hawaii 96720",
         "phone": "808-959-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -208,7 +345,7 @@ export class HomePage {
         "name": "Starbucks - HI - Hilo [D]  03648",
         "address": "Hilo_438 Kilauea Ave_Hilo, Hawaii 96720",
         "phone": "808-933-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -218,7 +355,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03649",
         "address": "Airport Trade Center_550 Paiea Street_Honolulu, Hawaii 96819",
         "phone": "808-833-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -228,7 +365,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03650",
         "address": "Aloha Tower_1 Aloha Tower Drive_Honolulu, Hawaii 96813",
         "phone": "808-522-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -238,7 +375,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03651",
         "address": "Bishop_1000 Bishop Street #104_Honolulu, Hawaii 96813",
         "phone": "808-599-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -248,7 +385,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03652",
         "address": "Central Pacific Bank_220 South King Street_Honolulu, Hawaii 96813",
         "phone": "808-538-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -258,7 +395,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03653",
         "address": "Discovery Bay_1778 Ala Moana Boulevard_Honolulu, Hawaii 96815",
         "phone": "808-946-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -268,7 +405,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03654",
         "address": "Ewa Beach_91-1401 Fort Weaver Road_Honolulu, Hawaii 96706",
         "phone": "808-685-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -278,7 +415,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03655",
         "address": "Duty Free Shopper_330 Royal Hawaiian Avenue_Honolulu, Hawaii 96815",
         "phone": "808-926-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -288,7 +425,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03656",
         "address": "Financial Plaza_130 Merchant Street #111_Honolulu, Hawaii 96813",
         "phone": "808-585-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -298,7 +435,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03657",
         "address": "Hawaii Kai Town Center_6700 Kalanianaole Highway_Honolulu, Hawaii 96825",
         "phone": "808-396-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -308,7 +445,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03658",
         "address": "Hokua_1288 Ala Moana Blvd_Honolulu, Hawaii 96814",
         "phone": "808-591-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -318,7 +455,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03659",
         "address": "Kamehameha Shopping Center_1620 North School Street_Honolulu, Hawaii 96817",
         "phone": "808-832-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -328,7 +465,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03660",
         "address": "Kahala Mall_4211 Waialae Avenue_Honolulu, Hawaii 96816",
         "phone": "808-737-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -338,7 +475,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03661",
         "address": "Keeaumoku_678 Keeamoku Street #106_Honolulu, Hawaii 96814",
         "phone": "808-946-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -348,7 +485,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03662",
         "address": "Kapahulu Avenue_625 Kapahulu Avenue_Honolulu, Hawaii 96815",
         "phone": "808-734-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -358,7 +495,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03663",
         "address": "Koko Marina_7192 Kalanianaole Highway_Honolulu, Hawaii 96825",
         "phone": "808-394-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -368,7 +505,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03664",
         "address": "Manoa Valley_2902 East Manoa Road_Honolulu, Hawaii 96822",
         "phone": "808-988-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -378,7 +515,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03665",
         "address": "Macys Ala Moana_1450 Ala Moan Boulevard_Honolulu, Hawaii 96814",
         "phone": "808-943-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -388,7 +525,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03666",
         "address": "Moanalua Shopping Center_930 Valkenburgh Street_Honolulu, Hawaii 96818",
         "phone": "808-422-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -398,7 +535,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03667",
         "address": "Outrigger Reef_2169 Kalia Road #102_Honolulu, Hawaii 96815",
         "phone": "808-922-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -408,7 +545,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03668",
         "address": "Ohana Waikiki West_2330 Kuhio Avenue_Honolulu, Hawaii 96815",
         "phone": "808-922-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -418,7 +555,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03669",
         "address": "Sand Island_120 Sand Island Access Road #4_Honolulu, Hawaii 96819",
         "phone": "808-832-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -428,7 +565,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03670",
         "address": "Park Shore Hotel_2856 Kalakaua Avenue_Honolulu, Hawaii 96815",
         "phone": "808-923-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -438,7 +575,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03671",
         "address": "Sears Ala Moana Center_1450 Ala Moana Blvd._Honolulu, Hawaii 96814",
         "phone": "808-943-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -448,7 +585,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03672",
         "address": "Waikiki Shopping Plaza_2270 Kalakaua Avenue #1800_Honolulu, Hawaii 96815",
         "phone": "808-922-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -458,7 +595,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03673",
         "address": "Waikiki Trade Center_2255 Kuhio Avenue S-1_Honolulu, Hawaii 96815",
         "phone": "808-921-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -468,7 +605,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03674",
         "address": "Ward Entertainment Center_310 Kamakee Street #6_Honolulu, Hawaii 96814",
         "phone": "808-593-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -478,7 +615,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03675",
         "address": "Windward City Shopping Center_45-480 Kaneohe Bay Drive_Honolulu, Hawaii 96744",
         "phone": "808-234-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -488,7 +625,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03676",
         "address": "Waikiki Walk_2222 Kalakaua Avenue_Honolulu, Hawaii 96815",
         "phone": "808-926-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -498,7 +635,7 @@ export class HomePage {
         "name": "Starbucks - HI - Honolulu  03677",
         "address": "Ward Gateway_1142 Auahi Street_Honolulu, Hawaii 96814",
         "phone": "808-589-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -507,7 +644,7 @@ export class HomePage {
         },
         "name": "Starbucks - HI - Honolulu [A]  03678",
         "address": "HNL Honolulu Airport_300 Rogers Blvd_Honolulu, Hawaii 96820",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -517,7 +654,7 @@ export class HomePage {
         "name": "Starbucks - HI - Kahului  03679",
         "address": "Queen Kaahumanu Center_275 West Kaahuman Avenue #1200 F5_Kahului, Hawaii 96732",
         "phone": "808-871-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -527,7 +664,7 @@ export class HomePage {
         "name": "Starbucks - HI - Kahului  03680",
         "address": "Maui Marketplace_270 Dairy Road_Kahului, Hawaii 96732",
         "phone": "808-871-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -537,7 +674,7 @@ export class HomePage {
         "name": "Starbucks - HI - Kailua  03681",
         "address": "Kailua Village_539 Kailua Road_Kailua, Hawaii 96734",
         "phone": "808-263-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -547,7 +684,7 @@ export class HomePage {
         "name": "Starbucks - HI - Kailua-Kona  03682",
         "address": "Kona Coast Shopping Center_74-5588 Palani Road_Kailua-Kona, Hawaii 96740",
         "phone": "808-329-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -557,7 +694,7 @@ export class HomePage {
         "name": "Starbucks - HI - Kamuela  03683",
         "address": "Parker Ranch Center_67-1185 Mamalahoa Highway D108_Kamuela, Hawaii 96743",
         "phone": "808-887-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -567,7 +704,7 @@ export class HomePage {
         "name": "Starbucks - HI - Kapolei  03684",
         "address": "Halekuai Center_563 Farrington Highway #101_Kapolei, Hawaii 96707",
         "phone": "808-674-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -577,7 +714,7 @@ export class HomePage {
         "name": "Starbucks - HI - Kapolei [D]  03685",
         "address": "Kapolei Parkway_338 Kamokila Boulevard #108_Kapolei, Hawaii 96797",
         "phone": "808-674-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -587,7 +724,7 @@ export class HomePage {
         "name": "Starbucks - HI - Kihei  03686",
         "address": "Kukui Mall_1819 South Kihei Road_Kihei, Hawaii 96738",
         "phone": "808-891-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -597,7 +734,7 @@ export class HomePage {
         "name": "Starbucks - HI - Kihei  03687",
         "address": "Piilani Village Shopping Center_247 Piikea Avenue #106_Kihei, Hawaii 96753",
         "phone": "808-891-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -607,7 +744,7 @@ export class HomePage {
         "name": "Starbucks - HI - Kohala Coast  03688",
         "address": "Mauna Lani_68-1330 Mauna Lani Drive H-101b_Kohala Coast, Hawaii 96743",
         "phone": "808-885-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -617,7 +754,7 @@ export class HomePage {
         "name": "Starbucks - HI - Lahaina  03689",
         "address": "Lahaina Cannery Mall_1221 Honoapiilani Highway_Lahaina, Hawaii 96761",
         "phone": "808-661-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -627,7 +764,7 @@ export class HomePage {
         "name": "Starbucks - HI - Lahaina  03690",
         "address": "Lahaina_845 Wainee Street_Lahaina, Hawaii 96761",
         "phone": "808-667-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -637,7 +774,7 @@ export class HomePage {
         "name": "Starbucks - HI - Lihue  03691",
         "address": "Kukui Grove_3-2600 Kaumualii Highway #A8_Lihue, Hawaii 96766",
         "phone": "808-241-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -647,7 +784,7 @@ export class HomePage {
         "name": "Starbucks - HI - Maui [A]  03692",
         "address": "OGG Kahului Main Concourse_New Terminal Bldg @ Bldg 340_Maui, Hawaii 96732",
         "phone": "808-877-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -657,7 +794,7 @@ export class HomePage {
         "name": "Starbucks - HI - Mililani  03693",
         "address": "Mililani Shopping Center_95-221 Kipapa Drive_Mililani, Hawaii 96789",
         "phone": "808-625-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -667,7 +804,7 @@ export class HomePage {
         "name": "Starbucks - HI - Mililani  03694",
         "address": "Mililani Town Center_95-1249 Meheula Parkway_Mililani, Hawaii 96789",
         "phone": "808-627-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -677,7 +814,7 @@ export class HomePage {
         "name": "Starbucks - HI - Pukalani  03695",
         "address": "Pukalani Foodland_55 Pukalani Street_Pukalani, Hawaii 96768",
         "phone": "808-573-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -687,7 +824,7 @@ export class HomePage {
         "name": "Starbucks - HI - Waipahu  03696",
         "address": "Enchanted Lakes_1020 Keolu Drive_Waipahu, Hawaii 96734",
         "phone": "808-263-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -697,7 +834,7 @@ export class HomePage {
         "name": "Starbucks - HI - Waipahu  03697",
         "address": "Kunia Shopping Center_94-673 Kupuohi Street_Waipahu, Hawaii 96797",
         "phone": "808-680-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       },
       {
         "position": {
@@ -707,8 +844,9 @@ export class HomePage {
         "name": "Starbucks - HI - Waipahu  03698",
         "address": "Waikele_94-799 Lumiaina Street_Waipahu, Hawaii 96797",
         "phone": "808-678-0000",
-        "icon": "./img/starbucks.png"
+        icon: 'blue'
       }
     ];
   }
 }
+
