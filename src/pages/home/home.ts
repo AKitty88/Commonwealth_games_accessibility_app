@@ -63,7 +63,7 @@ export class HomePage {
           lat: -27.9623464,
           lng: 153.3880684
         },
-        zoom: 14,
+        zoom: 15,
         tilt: 30
       }
     };
