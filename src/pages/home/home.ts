@@ -63,7 +63,7 @@ export class HomePage {
           lat: -27.9623464,
           lng: 153.3880684
         },
-        zoom: 8,
+        zoom: 14,
         tilt: 30
       }
     };
@@ -83,7 +83,7 @@ export class HomePage {
         var botLat = region.southwest.lat;
         var leftLong = region.southwest.lng;
         var rightLong = region.northeast.lng;
-
+        console.log("topLat botLat leftLong rightLong", topLat, botLat, leftLong, rightLong);
         let pos: LatLng = new LatLng(0, 0);
         var markers = [];
 
@@ -97,6 +97,7 @@ export class HomePage {
             var lat = 0;
             var long = 0;
             for (let j in data[i].geometry.coordinates[0]) {
+      
               count++;
               long += data[i].geometry.coordinates[0][j][0];
               lat += data[i].geometry.coordinates[0][j][1];
@@ -114,7 +115,7 @@ export class HomePage {
             // ? region bounds different? not working
             if (long >= leftLong && long <= rightLong && lat >= botLat && lat <= topLat) {
               let pos: LatLng = new LatLng(lat, long);
-              console.log("marker puuuush ----)");
+              //console.log("marker puuuush ----)");
               markers.push({
                 'pos': pos,
                 'type': 1,
@@ -132,7 +133,7 @@ export class HomePage {
           }
 
           for (let i in markers) {
-            console.log(i, " in marker");
+            
             let markerOptions2: MarkerOptions = {
               position: markers[i].pos,
               title: "Fatal",
