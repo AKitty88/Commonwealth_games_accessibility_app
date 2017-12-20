@@ -45,6 +45,7 @@ export class HomePage {
       this.loadMap();
     });
 
+
     // setup
   }
 
@@ -78,11 +79,11 @@ export class HomePage {
     this.map.one(GoogleMapsEvent.MAP_READY)
       .then(() => {
         console.log("loadMap:: GoogleMaps READY");
-        
+
         // Populate the map view
         this.loadMarkers();
       })
-      
+
 
     /*
       var options = {
@@ -106,97 +107,95 @@ export class HomePage {
 
   }
 
-  // ionViewDidLoad() {}
-  // }
   loadMarkers() {
     console.log("loadMarkers:: ");
     // const locations: any[] = this.dummyData();
 
     // 
     var region = this.map.getVisibleRegion();
-        console.log("region is" + region);
-        var topLat = region.northeast.lat;
-        var botLat = region.southwest.lat;
-        var leftLong = region.southwest.lng;
-        var rightLong = region.northeast.lng;
-        console.log("topLat botLat leftLong rightLong", topLat, botLat, leftLong, rightLong);
-        let pos: LatLng = new LatLng(0, 0);
-        var markers = [];
+    console.log("region is" + region);
+    var topLat = region.northeast.lat;
+    var botLat = region.southwest.lat;
+    var leftLong = region.southwest.lng;
+    var rightLong = region.northeast.lng;
+    console.log("topLat botLat leftLong rightLong", topLat, botLat, leftLong, rightLong);
+    let pos: LatLng = new LatLng(0, 0);
+    var markers = [];
 
-        // - TODO: Faster performance by pre-sorting the data?
-        this.JsonFileLoader.getData().subscribe((data) => {
+    // - TODO: Faster performance by pre-sorting the data?
+    this.JsonFileLoader.getData().subscribe((data) => {
 
-          data = data.features;
-          for (let i in data) {
-            // console.log(data[i].geometry.coordinates[0]);
-            var count = 0;
-            var lat = 0;
-            var long = 0;
-            for (let j in data[i].geometry.coordinates[0]) {
-      
-              count++;
-              long += data[i].geometry.coordinates[0][j][0];
-              lat += data[i].geometry.coordinates[0][j][1];
-            }
-            lat = lat / count;
-            long = long / count;
+      data = data.features;
+      for (let i in data) {
+        // console.log(data[i].geometry.coordinates[0]);
+        var count = 0;
+        var lat = 0;
+        var long = 0;
+        for (let j in data[i].geometry.coordinates[0]) {
 
-            markers.push({
-              'pos': pos,
-              'type': 1,
-              'close': [],
-              'added': false,
-              'id': i
-            })
-            // Don't worry about updating markers on slide/zoom events #issue **MarkerClustering first**.
-            // 
-            if (long >= leftLong && 
-                long <= rightLong && 
-                lat >= botLat && 
-                lat <= topLat) {
-              let pos: LatLng = new LatLng(lat, long);
-              //console.log("marker puuuush ----)");
-              markers.push({
-                'pos': pos,
-                'type': 1,
-                'close': [],
-                'added': false,
-                'id': i
-              })
+          count++;
+          long += data[i].geometry.coordinates[0][j][0];
+          lat += data[i].geometry.coordinates[0][j][1];
+        }
+        lat = lat / count;
+        long = long / count;
 
-            }
+        markers.push({
+          'pos': pos,
+          'type': 1,
+          'close': [],
+          'added': false,
+          'id': i
+        })
+        // Don't worry about updating markers on slide/zoom events #issue **MarkerClustering first**.
+        // 
+        if (long >= leftLong &&
+          long <= rightLong &&
+          lat >= botLat &&
+          lat <= topLat) {
+          let pos: LatLng = new LatLng(lat, long);
+          //console.log("marker puuuush ----)");
+          markers.push({
+            'pos': pos,
+            'type': 1,
+            'close': [],
+            'added': false,
+            'id': i
+          })
+
+        }
 
 
-            if (parseInt(i) == data.length - 1)
-              console.log("byebye");                    // hello
+        if (parseInt(i) == data.length - 1)
+          console.log("byebye");                    // hello
 
-          }
+      }
 
-          for (let i in markers) {
-            
-            let markerOptions2: MarkerOptions = {
-              position: markers[i].pos,
-              title: "Fatal",
-              icon: "red"
-            }
+      for (let i in markers) {
 
-            // this.map.fromLatLngToPoint(markers[i].pos, function (data) {
-            //   console.log(data);
-            //
-            //   //add markers that are close
-            // })
+        let markerOptions2: MarkerOptions = {
+          position: markers[i].pos,
+          title: "Fatal",
+          icon: "red"
+        }
 
-            this.map.addMarker(markerOptions2)
-              .then((marker: Marker) => {
-                marker.on(GoogleMapsEvent.MARKER_CLICK)
-                  .subscribe(() => {
-                    marker.showInfoWindow();
-                    alert('Marker clicked title:' + marker.getTitle() + marker.getPosition());
-                  });
+        // this.map.fromLatLngToPoint(markers[i].pos, function (data) {
+        //   console.log(data);
+        //
+        //   //add markers that are close
+        // })
+
+        this.map.addMarker(markerOptions2)
+          .then((marker: Marker) => {
+            marker.on(GoogleMapsEvent.MARKER_CLICK)
+              .subscribe(() => {
+                marker.showInfoWindow();
+                alert('Marker clicked title:' + marker.getTitle() + marker.getPosition());
               });
-          }
+          });
+      }
 
-        });
+    });
 
 
     // addMarker async faster than for loop
@@ -246,7 +245,14 @@ export class HomePage {
     //         //alert('clicked');
     //       });
     //   });
+    let gridSize = {
+      'pxWidth': 200,
+      'pxHeight': 400
+    }
+    let numCategories = 3;                              // - FIXME: 
     console.log("loadMarkers:: markers added.");
+    this.doClusterer(markers, topLat, botLat, leftLong, rightLong, gridSize, numCategories);
+
   }
 
 
@@ -267,28 +273,37 @@ export class HomePage {
   // - 
   // -
   // 
-  doClusterer(markersData, 
-              /*view and grid cell bounds*/ 
-              topLat, botLat, 
-              leftLong, rightLong, 
-              gridsize, numCategories){
+  doClusterer(markersData,
+    /*view and grid cell bounds*/
+    topLat, botLat,
+    leftLong, rightLong,
+    gridsize, numCategories) {
     // Check limit granularity of pie chart categories display.
     // just process data array to determine categories? data structures? pre-sort? count the distribution.
     // 
     var clusters = [];
-    
+      console.log("doClusterer:: markersData", markersData[1]);
     // Assign each point to a cluster based on grid cell height and width
-    for (let i in markersData) {
-      var col = 
+    var count = 0;
+    while (count < 10) {
+      console.log("doClusterer:: marker", markersData[count]);
+      count++;
+    }
 
+
+    for (let i in markersData) {
+
+      //var col = ;
     }
 
     // Combine adjacent clusters into 'superclusters'. Assume points are naturally clustered.
-    
+
     // 1. sort list of clusters based on number of points descending.
 
     // 2. Iterate list of clusters, looking at eight adjacent cells
 
-    
+
   }
 
+
+}
