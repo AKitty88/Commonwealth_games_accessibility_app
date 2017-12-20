@@ -118,7 +118,7 @@ export class HomePage {
     var botLat = region.southwest.lat;
     var leftLong = region.southwest.lng;
     var rightLong = region.northeast.lng;
-    console.log("topLat botLat leftLong rightLong", topLat, botLat, leftLong, rightLong);
+    console.log("Screenbounds: topLat botLat leftLong rightLong", topLat, botLat, leftLong, rightLong);
     let pos: LatLng = new LatLng(0, 0);
     var markers = [];
 
@@ -133,21 +133,25 @@ export class HomePage {
         var long = 0;
         for (let j in data[i].geometry.coordinates[0]) {
           count++;
-          long  += data[i].geometry.coordinates[0][j][0];
+          long  += data[i].geometry.coordinates[0][j][0];       // TSulli123 resolved the polygon coords long lat into the average centre for marker placement.
           lat   += data[i].geometry.coordinates[0][j][1];
         }
         lat = lat / count;
         long = long / count;
-        console.log();
-        markers.push({
-          'pos':          pos,
-          'category':     1,
-          'parkingType':  "Fatality",                   // -FIXME: for parking only. normalisation or restructure functions.
-          'close':        [],                           // @TSulli123 -close? to resolve clustering?                     
-          'added':        false,
-          'id':           i
-        })
-        // Don't worry about updating markers on slide/zoom events #issue **MarkerClustering first**.
+  
+
+        // Oops.
+        // markers.push({
+        //   'pos':          pos,
+        //   'category':     1,
+        //   'parkingType':  "Fatality",                   // -FIXME: for parking only. normalisation or restructure functions.
+        //   'close':        [],                           // @TSulli123 -close? to resolve clustering?                     
+        //   'added':        false,
+        //   'id':           i
+        // })
+
+
+        // Don't worry about updating markers on slide/zoom events #3 #issue **MarkerClustering first**.
         // 
         if (long >= leftLong &&
           long <= rightLong &&
@@ -188,7 +192,7 @@ export class HomePage {
 
       }
 
-      for (let i in markers) {
+      for (let i in markers) {                          // From previous screenbounds If-statement latlng validation, markers should contain 
 
         let markerOptions2: MarkerOptions = {
           position: markers[i].pos,
@@ -206,6 +210,13 @@ export class HomePage {
 
         this.map.addMarker(markerOptions2)
           .then((marker: Marker) => {
+
+            this.map.fromLatLngToPoint(marker.getPosition()).then( 
+              point => { 
+                console.log("added marker at PIXEL POSITION: ", point[0], ",", point[1] );
+            });
+
+
             marker.on(GoogleMapsEvent.MARKER_CLICK)
               .subscribe(() => {
                 marker.showInfoWindow();
@@ -214,7 +225,7 @@ export class HomePage {
                 // the promised screen pixel values of lat lng
                 this.map.fromLatLngToPoint(marker.getPosition())
                   .then(point => {
-                    console.log("added", marker.getPosition);
+
                     
                     alert("Marker clicked title:" +
                       marker.getTitle() + "\n" + 
@@ -290,13 +301,13 @@ export class HomePage {
       'pxWidth':  10,                                    // Placeholder values.
       'pxHeight': 10
     }
-    let numCategories = 3;                              // - FIXME: 
+    let numCategories = 3;                              // - FIXME: Hardcoded numCategories to discern from the datasets given?
     console.log("loadMarkers:: markers added.");
     this.doClusterer(markers, topLat, botLat, leftLong, rightLong, gridCellSize, numCategories);
 
-  }
+  } // _loadMarkers()
 
-  // Helper function to scale proportions vs icon size
+  // Helper function to scale proportions vs icon size ~~ // - FIXME: cleanup unused functions.
   getMapSizeDegrees(topLat, botLat, leftLong, rightLong) {
     
   }
@@ -325,10 +336,10 @@ export class HomePage {
   // -
   // 
   doClusterer(markersData,
-    /*view and grid cell bounds*/
-    topLat, botLat,
-    leftLong, rightLong,
-    gridsize, numCategories) {
+              /*view and grid cell bounds*/
+              topLat, botLat,
+              leftLong, rightLong,
+              gridsize, numCategories) {
     // Check limit granularity of pie chart categories display.
     // just process data array to determine categories? data structures? pre-sort? count the distribution.
     // 
@@ -337,7 +348,7 @@ export class HomePage {
     // Assign each point to a cluster based on grid cell height and width
     var count = 0;
     while (count < 10) {
-      console.log("doClusterer:: marker", markersData[count]);
+      console.log("doClusterer:: marker", markersData[count]);  // - FIXME: doesn't do anything.
       count++;
     }
 
