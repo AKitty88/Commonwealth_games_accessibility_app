@@ -163,6 +163,19 @@ export class HomePage {
             'id': i
           })
 
+
+          var pt = this.map.fromLatLngToPoint(pos);
+          // pt.then(point => {
+          //   console.log(point[0], point[1], point, "lol");
+          // });
+
+          console.log("test latlng to px point:", pt, pt[0], pt[1], pos);
+          var resolvedPoint = pt.then(point => {
+            return point[0];
+          });
+          //Promise.resolve(resolvedPoint);
+
+          console.log("resolved point is ", resolvedPoint.then);
         }
 
 
@@ -190,7 +203,23 @@ export class HomePage {
             marker.on(GoogleMapsEvent.MARKER_CLICK)
               .subscribe(() => {
                 marker.showInfoWindow();
-                alert('Marker clicked title:' + marker.getTitle() + marker.getPosition());
+
+                // Promise! moved alert inside the `promise.then` to take advantage of 
+                // the promised screen pixel values of lat lng
+                this.map.fromLatLngToPoint(marker.getPosition())
+                  .then(point => {
+                    alert("Marker clicked title:" +
+                      marker.getTitle() +
+                      marker.getPosition() +
+                      " Promise pt " +
+                      point[0] +
+                      " " +
+                      point[1]
+                    );
+                  })
+
+
+
               });
           });
       }
@@ -218,6 +247,7 @@ export class HomePage {
     //   console.log("hi");
     // });
 
+    // Test marker
     this.map.addMarker({
       title: 'Commonwealth Games Village',
       snippet: "The Commonwealth Games Village (CGV) and the redevelopment of Parklands, Southport is one of the largest urban renewal projects ever undertaken on the Gold Coast.",
@@ -256,6 +286,12 @@ export class HomePage {
   }
 
 
+  getPixelDistance( /* lat1, long1, lat2, long2, zoom: number */) {
+    //let pixels = this.map.fromLatLngToPoint(new LatLng(0, 0)); // get pixels from the topleft of the div.
+
+
+  }
+
   /**
    * doClusterer:
    * @description: Don't need mathematically precise clustering. Just some way of consolidating markers to avoid noise:
@@ -282,7 +318,7 @@ export class HomePage {
     // just process data array to determine categories? data structures? pre-sort? count the distribution.
     // 
     var clusters = [];
-      console.log("doClusterer:: markersData", markersData[1]);
+    console.log("doClusterer:: markersData", markersData[1]);
     // Assign each point to a cluster based on grid cell height and width
     var count = 0;
     while (count < 10) {
