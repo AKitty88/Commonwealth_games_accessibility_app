@@ -163,7 +163,8 @@ export class HomePage {
             'id': i
           })
 
-
+          
+          // Test code 
           var pt = this.map.fromLatLngToPoint(pos);
           // pt.then(point => {
           //   console.log(point[0], point[1], point, "lol");
@@ -173,11 +174,11 @@ export class HomePage {
           var resolvedPoint = pt.then(point => {
             return point[0];
           });
-          //Promise.resolve(resolvedPoint);
+          Promise.resolve(resolvedPoint);
 
-          console.log("resolved point is ", resolvedPoint.then);
+          console.log("resolved point is ", resolvedPoint);
         }
-
+        // _ Test code fin.
 
         if (parseInt(i) == data.length - 1)
           console.log("byebye");                    // hello
@@ -275,21 +276,22 @@ export class HomePage {
     //         //alert('clicked');
     //       });
     //   });
-    let gridSize = {
-      'pxWidth': 200,
-      'pxHeight': 400
+    let gridCellSize = {
+      'pxWidth': 10,                                    // Placeholder values.
+      'pxHeight': 10
     }
     let numCategories = 3;                              // - FIXME: 
     console.log("loadMarkers:: markers added.");
-    this.doClusterer(markers, topLat, botLat, leftLong, rightLong, gridSize, numCategories);
+    this.doClusterer(markers, topLat, botLat, leftLong, rightLong, gridCellSize, numCategories);
 
   }
 
-
+  getMapSizeDegrees(topLat, botLat, leftLong, rightLong) {
+    
+  }
   getPixelDistance( /* lat1, long1, lat2, long2, zoom: number */) {
     //let pixels = this.map.fromLatLngToPoint(new LatLng(0, 0)); // get pixels from the topleft of the div.
-
-
+  
   }
 
   /**
