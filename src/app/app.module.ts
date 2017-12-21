@@ -14,6 +14,7 @@ import { ListPage } from '../pages/list/list';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { ConnectionBackend } from '@angular/http/src/interfaces';
+import { GoogleMapsProvider } from '../providers/google-maps/google-maps';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { ConnectionBackend } from '@angular/http/src/interfaces';
     HttpModule,
     StatusBar,
     SplashScreen,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    GoogleMapsProvider
   ]
 })
 export class AppModule {}

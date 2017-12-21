@@ -1,4 +1,5 @@
 import { jsonFileLoader } from './../../services/jsonFileLoader';
+import { GoogleMapsProvider } from './../../providers/google-maps/google-maps';
 
 import {
   GoogleMaps,
@@ -8,7 +9,6 @@ import {
   CameraPosition,
   MarkerOptions,
   Marker,
-  MarkerCluster,
   BaseArrayClass,
   LatLng
 } from '@ionic-native/google-maps';
@@ -28,7 +28,7 @@ export class HomePage {
   map: GoogleMap;
 
 
-  // - DEPRECATED FIXED: `private _googleMaps: GoogleMaps` no longer needed in constructor 
+  // - DEPRECATED FIXED: `private _googleMaps: GoogleMaps` no longer needed in constructor
   constructor(public navCtrl: NavController,
     public platform: Platform,
     public JsonFileLoader: jsonFileLoader) {
@@ -111,7 +111,7 @@ export class HomePage {
     console.log("loadMarkers:: ");
     // const locations: any[] = this.dummyData();
 
-    // 
+    //
     var region = this.map.getVisibleRegion();
     console.log("region is" + region);
     var topLat = region.northeast.lat;
@@ -148,7 +148,7 @@ export class HomePage {
           'id': i
         })
         // Don't worry about updating markers on slide/zoom events #issue **MarkerClustering first**.
-        // 
+        //
         if (long >= leftLong &&
           long <= rightLong &&
           lat >= botLat &&
@@ -163,8 +163,8 @@ export class HomePage {
             'id': i
           })
 
-          
-          // Test code 
+
+          // Test code
           var pt = this.map.fromLatLngToPoint(pos);
           // pt.then(point => {
           //   console.log(point[0], point[1], point, "lol");
@@ -205,7 +205,7 @@ export class HomePage {
               .subscribe(() => {
                 marker.showInfoWindow();
 
-                // Promise! moved alert inside the `promise.then` to take advantage of 
+                // Promise! moved alert inside the `promise.then` to take advantage of
                 // the promised screen pixel values of lat lng
                 this.map.fromLatLngToPoint(marker.getPosition())
                   .then(point => {
@@ -280,37 +280,37 @@ export class HomePage {
       'pxWidth': 10,                                    // Placeholder values.
       'pxHeight': 10
     }
-    let numCategories = 3;                              // - FIXME: 
+    let numCategories = 3;                              // - FIXME:
     console.log("loadMarkers:: markers added.");
     this.doClusterer(markers, topLat, botLat, leftLong, rightLong, gridCellSize, numCategories);
 
   }
 
   getMapSizeDegrees(topLat, botLat, leftLong, rightLong) {
-    
+
   }
   getPixelDistance( /* lat1, long1, lat2, long2, zoom: number */) {
     //let pixels = this.map.fromLatLngToPoint(new LatLng(0, 0)); // get pixels from the topleft of the div.
-  
+
   }
 
   /**
    * doClusterer:
    * @description: Don't need mathematically precise clustering. Just some way of consolidating markers to avoid noise:
    * Avoid overlapping markers
-   * 
+   *
    * @param: markersData
    * @argument: markersData:
    * - markersData: array of markers with an attribute (key-value) of 'pos' of type LatLng.
    * Naive grid-based clustering? O(n) time?
-   * 2006 Google Maps Hacks #69: 
+   * 2006 Google Maps Hacks #69:
    */
   // Don't need mathematically precise clustering.
   // Just some way of consolidating markers to avoid noise:
   // - overlapping markers
-  // - 
   // -
-  // 
+  // -
+  //
   doClusterer(markersData,
     /*view and grid cell bounds*/
     topLat, botLat,
@@ -318,7 +318,7 @@ export class HomePage {
     gridsize, numCategories) {
     // Check limit granularity of pie chart categories display.
     // just process data array to determine categories? data structures? pre-sort? count the distribution.
-    // 
+    //
     var clusters = [];
     console.log("doClusterer:: markersData", markersData[1]);
     // Assign each point to a cluster based on grid cell height and width
