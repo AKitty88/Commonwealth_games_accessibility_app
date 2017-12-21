@@ -1,4 +1,5 @@
 import { jsonFileLoader } from './../../services/jsonFileLoader';
+import { GoogleMapsProvider } from './../../providers/google-maps/google-maps';
 
 import {
   GoogleMaps,
@@ -8,7 +9,6 @@ import {
   CameraPosition,
   MarkerOptions,
   Marker,
-  MarkerCluster,
   BaseArrayClass,
   LatLng
 } from '@ionic-native/google-maps';
@@ -30,7 +30,7 @@ export class HomePage {
 
 
 
-  // - DEPRECATED FIXED: `private _googleMaps: GoogleMaps` no longer needed in constructor 
+  // - DEPRECATED FIXED: `private _googleMaps: GoogleMaps` no longer needed in constructor
   constructor(public navCtrl: NavController,
     public platform: Platform,
     public JsonFileLoader: jsonFileLoader) {
@@ -113,7 +113,7 @@ export class HomePage {
     console.log("loadMarkers:: ");
     // const locations: any[] = this.dummyData();
 
-    // 
+    //
     var region = this.map.getVisibleRegion();
     console.log("region is" + region);
     var topLat = region.northeast.lat;
@@ -140,21 +140,25 @@ export class HomePage {
         }
         lat = lat / count;
         long = long / count;
-  
+
 
         // Oops.
         // markers.push({
         //   'pos':          pos,
         //   'category':     1,
         //   'parkingType':  "Fatality",                   // -FIXME: for parking only. normalisation or restructure functions.
+<<<<<<< HEAD
         //   'close':        [],                           // @TSulli123 -close? to resolve clustering? for markers that are close together?                
+=======
+        //   'close':        [],                           // @TSulli123 -close? to resolve clustering?
+>>>>>>> 1b9f990bdad977333708936055831b5026528bed
         //   'added':        false,
         //   'id':           i
         // })
 
 
         // Don't worry about updating markers on slide/zoom events #3 #issue **MarkerClustering first**.
-        // 
+        //
         if (long >= leftLong &&
           long <= rightLong &&
           lat >= botLat &&
@@ -171,14 +175,14 @@ export class HomePage {
             'id':           i
           })
 
-          
-          // Test code 
+
+          // Test code
           var pt = this.map.fromLatLngToPoint(pos);
           // pt.then(point => {
           //   console.log(point[0], point[1], point, "lol");
           // });
 
-          
+
           // console.log("test latlng to px point:", pt, pt[0], pt[1], pos);
           var resolvedPointLat = pt.then(point => {
             return point[0];
@@ -194,7 +198,7 @@ export class HomePage {
 
       }
 
-      for (let i in markers) {                          // From previous screenbounds If-statement latlng validation, markers should contain 
+      for (let i in markers) {                          // From previous screenbounds If-statement latlng validation, markers should contain
 
         
         let markerOptions2: MarkerOptions = {
@@ -212,9 +216,15 @@ export class HomePage {
         // })
         this.map.addMarker(markerOptions2)
           .then((marker: Marker) => {
+<<<<<<< HEAD
             
             this.map.fromLatLngToPoint(marker.getPosition()).then( 
               point => { 
+=======
+
+            this.map.fromLatLngToPoint(marker.getPosition()).then(
+              point => {
+>>>>>>> 1b9f990bdad977333708936055831b5026528bed
                 console.log("added marker at PIXEL POSITION: ", point[0], ",", point[1] );
                 var arrLength = this.markersArr.push(marker);         // debug
                 console.log("placedMarkersArray Length", arrLength);  // debug
@@ -225,14 +235,14 @@ export class HomePage {
               .subscribe(() => {
                 marker.showInfoWindow();
 
-                // Promise! moved alert inside the `promise.then` to take advantage of 
+                // Promise! moved alert inside the `promise.then` to take advantage of
                 // the promised screen pixel values of lat lng
                 this.map.fromLatLngToPoint(marker.getPosition())
                   .then(point => {
 
-                    
+
                     alert("Marker clicked title:" +
-                      marker.getTitle() + "\n" + 
+                      marker.getTitle() + "\n" +
                       marker.getPosition() + "\n" +
                       " Promise pt " +
                       point[0] +
@@ -337,32 +347,32 @@ export class HomePage {
 
   // Helper function to scale proportions vs icon size ~~ // - FIXME: cleanup unused functions.
   getMapSizeDegrees(topLat, botLat, leftLong, rightLong) {
-    
+
   }
 
   // Helper function to get pixel distance of screen points.
   getPixelDistance( /* lat1, long1, lat2, long2, zoom: number */) {
     //let pixels = this.map.fromLatLngToPoint(new LatLng(0, 0)); // get pixels from the topleft of the div.
-  
+
   }
 
   /**
    * doClusterer:
    * @description: Don't need mathematically precise clustering. Just some way of consolidating markers to avoid noise:
    * Avoid overlapping markers
-   * 
+   *
    * @param: markersData
    * @argument: markersData:
    * - markersData: array of markers with an attribute (key-value) of 'pos' of type LatLng.
    * Naive grid-based clustering? O(n) time?
-   * 2006 Google Maps Hacks #69: 
+   * 2006 Google Maps Hacks #69:
    */
   // Don't need mathematically precise clustering.
   // Just some way of consolidating markers to avoid noise:
   // - overlapping markers
-  // - 
   // -
-  // 
+  // -
+  //
   doClusterer(markersData,
               /*view and grid cell bounds*/
               topLat, botLat,
@@ -370,7 +380,7 @@ export class HomePage {
               gridsize, numCategories) {
     // Check limit granularity of pie chart categories display.
     // just process data array to determine categories? data structures? pre-sort? count the distribution.
-    // 
+    //
     var clusters = [];
     console.log(Object.keys(markersData));
     console.log("doClusterer:: markersData mm", markersData.pos );
