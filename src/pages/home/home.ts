@@ -26,6 +26,8 @@ import { NavController } from 'ionic-angular';
 export class HomePage {
   @ViewChild('map') mapElement: ElementRef;
   map: GoogleMap;
+  markersArr: Marker[] = [];
+
 
 
   // - DEPRECATED FIXED: `private _googleMaps: GoogleMaps` no longer needed in constructor 
@@ -133,7 +135,7 @@ export class HomePage {
         var long = 0;
         for (let j in data[i].geometry.coordinates[0]) {
           count++;
-          long  += data[i].geometry.coordinates[0][j][0];       // TSulli123 resolved the polygon coords long lat into the average centre for marker placement.
+          long  += data[i].geometry.coordinates[0][j][0];   // TSulli123 resolved the polygon coords long lat into the average centre for marker placement.
           lat   += data[i].geometry.coordinates[0][j][1];
         }
         lat = lat / count;
@@ -145,7 +147,7 @@ export class HomePage {
         //   'pos':          pos,
         //   'category':     1,
         //   'parkingType':  "Fatality",                   // -FIXME: for parking only. normalisation or restructure functions.
-        //   'close':        [],                           // @TSulli123 -close? to resolve clustering?                     
+        //   'close':        [],                           // @TSulli123 -close? to resolve clustering? for markers that are close together?                
         //   'added':        false,
         //   'id':           i
         // })
@@ -194,6 +196,7 @@ export class HomePage {
 
       for (let i in markers) {                          // From previous screenbounds If-statement latlng validation, markers should contain 
 
+        
         let markerOptions2: MarkerOptions = {
           position: markers[i].pos,
           title:    markers[i].parkingType,             // - JOKE: non-fatal title name now.
@@ -207,15 +210,16 @@ export class HomePage {
         //
         //   //add markers that are close
         // })
-
         this.map.addMarker(markerOptions2)
           .then((marker: Marker) => {
-
+            
             this.map.fromLatLngToPoint(marker.getPosition()).then( 
               point => { 
                 console.log("added marker at PIXEL POSITION: ", point[0], ",", point[1] );
-            });
+                var arrLength = this.markersArr.push(marker);         // debug
+                console.log("placedMarkersArray Length", arrLength);  // debug
 
+            });
 
             marker.on(GoogleMapsEvent.MARKER_CLICK)
               .subscribe(() => {
@@ -235,6 +239,30 @@ export class HomePage {
                       " " +
                       point[1]
                     );
+
+                    // bloat test code
+                    let markerOptions3: MarkerOptions = {
+                      position: markers[0].pos,
+                      title:    markers[0].parkingType,             // - JOKE: non-fatal title name now.
+                      icon:     "yellow",
+                      animation:"DROP",
+                      disableAutoPan: true                          // disable auto centering onto the clicked marker.
+                    }
+                    
+
+                    this.map.addMarker(markerOptions3)
+                      .then((marker2: Marker) => {
+
+                        var diff = this.getMarkerPixelDistance(marker, marker2);
+                        let differ = Promise.resolve(diff);
+                        console.log("difference from marker is:", differ[0], differ[1]);      // am I breaking a promise? </3. Messy code with unresolved promises everywhere
+                      
+
+                      });
+
+                      
+                    // bloat test code end.
+
                   }) // _.then
 
 
@@ -344,6 +372,7 @@ export class HomePage {
     // just process data array to determine categories? data structures? pre-sort? count the distribution.
     // 
     var clusters = [];
+   
     console.log("doClusterer:: markersData", markersData[1]);
     // Assign each point to a cluster based on grid cell height and width
     var count = 0;
@@ -358,14 +387,67 @@ export class HomePage {
       //var col = ;
     }
 
+
+
+
+
     // Combine adjacent clusters into 'superclusters'. Assume points are naturally clustered.
 
     // 1. sort list of clusters based on number of points descending.
 
     // 2. Iterate list of clusters, looking at eight adjacent cells
 
-
   }
 
+  getDifference(a, b) {
+    return (a > b) ? (a - b) : (b - a);                 // Math.abs might return incorrect results?
+  }
+
+  getMarkerPixelDistance(marker1: Marker, marker2: Marker) {
+    // this.map.fromLatLngToPoint(marker1.getPosition()).then(point => {marker1.getPosition()
+    var diff = [-1, -1];                          // negative distance indicates error code.
+
+    this.map.fromLatLngToPoint(marker1.getPosition())
+      .then(pxPtA => {
+
+
+        this.map.fromLatLngToPoint(marker2.getPosition())
+          .then(pxPtB => {
+            console.log("Marker 1 PIXEL POSITION: ", pxPtA[0], ",", pxPtA[1]);
+            console.log("Marker 2 PIXEL POSITION: ", pxPtB[0], ",", pxPtB[1]);
+            let diffX = this.getDifference(pxPtA[0], pxPtB[0]);
+            let diffY = this.getDifference(pxPtA[1], pxPtB[1]);
+            console.log("Distance between Marker 1 and 2 =", diffX, diffY);
+
+            diff = [diffX, diffY];                        // - COOL: tuples!
+            
+          });
+
+          return diff;
+      });
+      
+      // return diff;
+  }
+
+  // 
+  cluster() {
+    // should take parameters for markers array, distance(cluster radius), zoom (map scale)
+    let zoom = 15;
+    let distance = 200;                 // pixels.
+    var markers   = [];
+    var clustered = [];
+
+    // Compare markers
+    while (markers.length > 0 ) {
+
+      var marker = markers.pop;
+      var cluster = [];
+      
+      for (let i in markers) {
+        var pixels = 1;
+      }
+    }
+
+  } // _cluster()
 
 }
