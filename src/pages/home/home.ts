@@ -372,14 +372,18 @@ export class HomePage {
     // just process data array to determine categories? data structures? pre-sort? count the distribution.
     // 
     var clusters = [];
-   
-    console.log("doClusterer:: markersData", markersData[1]);
+    console.log(Object.keys(markersData));
+    console.log("doClusterer:: markersData mm", markersData.pos );
+    //console.log("doClusterer:: markersData mzm", markersData[0].id );
+    var testMarkerAccessInFunction = markersData.pop();   // undefined?
+    console.log("doClusterer:: markersData pop", testMarkerAccessInFunction);
     // Assign each point to a cluster based on grid cell height and width
     var count = 0;
     while (count < 10) {
       console.log("doClusterer:: marker", markersData[count]);  // - FIXME: doesn't do anything.
       count++;
     }
+
 
 
     for (let i in markersData) {
