@@ -118,7 +118,7 @@ export class HomePage {
     var botLat = region.southwest.lat;
     var leftLong = region.southwest.lng;
     var rightLong = region.northeast.lng;
-    console.log("topLat botLat leftLong rightLong", topLat, botLat, leftLong, rightLong);
+    console.log("Screenbounds: topLat botLat leftLong rightLong", topLat, botLat, leftLong, rightLong);
     let pos: LatLng = new LatLng(0, 0);
     var markers = [];
 
@@ -132,35 +132,41 @@ export class HomePage {
         var lat = 0;
         var long = 0;
         for (let j in data[i].geometry.coordinates[0]) {
-
           count++;
-          long += data[i].geometry.coordinates[0][j][0];
-          lat += data[i].geometry.coordinates[0][j][1];
+          long  += data[i].geometry.coordinates[0][j][0];       // TSulli123 resolved the polygon coords long lat into the average centre for marker placement.
+          lat   += data[i].geometry.coordinates[0][j][1];
         }
         lat = lat / count;
         long = long / count;
 
-        markers.push({
-          'pos': pos,
-          'type': 1,
-          'close': [],
-          'added': false,
-          'id': i
-        })
-        // Don't worry about updating markers on slide/zoom events #issue **MarkerClustering first**.
+
+        // Oops.
+        // markers.push({
+        //   'pos':          pos,
+        //   'category':     1,
+        //   'parkingType':  "Fatality",                   // -FIXME: for parking only. normalisation or restructure functions.
+        //   'close':        [],                           // @TSulli123 -close? to resolve clustering?
+        //   'added':        false,
+        //   'id':           i
+        // })
+
+
+        // Don't worry about updating markers on slide/zoom events #3 #issue **MarkerClustering first**.
         //
         if (long >= leftLong &&
           long <= rightLong &&
           lat >= botLat &&
           lat <= topLat) {
           let pos: LatLng = new LatLng(lat, long);
+          let parkingType = data[i].properties.CLASS    // e.g. On-/Off-street
           //console.log("marker puuuush ----)");
-          markers.push({
-            'pos': pos,
-            'type': 1,
-            'close': [],
-            'added': false,
-            'id': i
+          markers.push({                                // See above marker description.
+            'pos':          pos,                        // point of Lat Lng
+            'category':     1,                          // Previously 'type' to categorise differentiate in pie chart?
+            'parkingType':  parkingType,                // -FIXME: for parking only. normalisation or restructure functions.
+            'close':        [],                         // @TSulli123 -close? to resolve clustering?
+            'added':        false,
+            'id':           i
           })
 
 
@@ -170,27 +176,30 @@ export class HomePage {
           //   console.log(point[0], point[1], point, "lol");
           // });
 
-          console.log("test latlng to px point:", pt, pt[0], pt[1], pos);
-          var resolvedPoint = pt.then(point => {
+
+          // console.log("test latlng to px point:", pt, pt[0], pt[1], pos);
+          var resolvedPointLat = pt.then(point => {
             return point[0];
           });
-          Promise.resolve(resolvedPoint);
+          //Promise.resolve(resolvedPoint);
 
-          console.log("resolved point is ", resolvedPoint);
+          // console.log("resolved point lat is ", resolvedPointLat);
         }
         // _ Test code fin.
 
         if (parseInt(i) == data.length - 1)
-          console.log("byebye");                    // hello
+          console.log("byebye");                        // hello
 
       }
 
-      for (let i in markers) {
+      for (let i in markers) {                          // From previous screenbounds If-statement latlng validation, markers should contain
 
         let markerOptions2: MarkerOptions = {
           position: markers[i].pos,
-          title: "Fatal",
-          icon: "red"
+          title:    markers[i].parkingType,             // - JOKE: non-fatal title name now.
+          icon:     "red",
+          animation:"DROP",
+          disableAutoPan: true                          // disable auto centering onto the clicked marker.
         }
 
         // this.map.fromLatLngToPoint(markers[i].pos, function (data) {
@@ -201,6 +210,13 @@ export class HomePage {
 
         this.map.addMarker(markerOptions2)
           .then((marker: Marker) => {
+
+            this.map.fromLatLngToPoint(marker.getPosition()).then(
+              point => {
+                console.log("added marker at PIXEL POSITION: ", point[0], ",", point[1] );
+            });
+
+
             marker.on(GoogleMapsEvent.MARKER_CLICK)
               .subscribe(() => {
                 marker.showInfoWindow();
@@ -209,26 +225,31 @@ export class HomePage {
                 // the promised screen pixel values of lat lng
                 this.map.fromLatLngToPoint(marker.getPosition())
                   .then(point => {
+
+
                     alert("Marker clicked title:" +
-                      marker.getTitle() +
-                      marker.getPosition() +
+                      marker.getTitle() + "\n" +
+                      marker.getPosition() + "\n" +
                       " Promise pt " +
                       point[0] +
                       " " +
                       point[1]
                     );
-                  })
+                  }) // _.then
 
 
+              }); // _.subscribe
 
-              });
-          });
-      }
-
-    });
+          }); // _.then
 
 
-    // addMarker async faster than for loop
+      } // _FOR loop
+
+
+    }); // _Json file loader _.subscribe
+
+
+    // addMarker async faster than for loop ?
     // console.log(locations[1].phone);
     // let baseArray: BaseArrayClass<any> = new BaseArrayClass<any>(locations);
     // baseArray.mapAsync((mOption: any, callback: (marker: Marker) => void) => {
@@ -248,7 +269,7 @@ export class HomePage {
     //   console.log("hi");
     // });
 
-    // Test marker
+    // Test marker to show display of snippet.
     this.map.addMarker({
       title: 'Commonwealth Games Village',
       snippet: "The Commonwealth Games Village (CGV) and the redevelopment of Parklands, Southport is one of the largest urban renewal projects ever undertaken on the Gold Coast.",
@@ -277,18 +298,21 @@ export class HomePage {
     //       });
     //   });
     let gridCellSize = {
-      'pxWidth': 10,                                    // Placeholder values.
+      'pxWidth':  10,                                    // Placeholder values.
       'pxHeight': 10
     }
-    let numCategories = 3;                              // - FIXME:
+    let numCategories = 3;                              // - FIXME: Hardcoded numCategories to discern from the datasets given?
     console.log("loadMarkers:: markers added.");
     this.doClusterer(markers, topLat, botLat, leftLong, rightLong, gridCellSize, numCategories);
 
-  }
+  } // _loadMarkers()
 
+  // Helper function to scale proportions vs icon size ~~ // - FIXME: cleanup unused functions.
   getMapSizeDegrees(topLat, botLat, leftLong, rightLong) {
 
   }
+
+  // Helper function to get pixel distance of screen points.
   getPixelDistance( /* lat1, long1, lat2, long2, zoom: number */) {
     //let pixels = this.map.fromLatLngToPoint(new LatLng(0, 0)); // get pixels from the topleft of the div.
 
@@ -312,10 +336,10 @@ export class HomePage {
   // -
   //
   doClusterer(markersData,
-    /*view and grid cell bounds*/
-    topLat, botLat,
-    leftLong, rightLong,
-    gridsize, numCategories) {
+              /*view and grid cell bounds*/
+              topLat, botLat,
+              leftLong, rightLong,
+              gridsize, numCategories) {
     // Check limit granularity of pie chart categories display.
     // just process data array to determine categories? data structures? pre-sort? count the distribution.
     //
@@ -324,7 +348,7 @@ export class HomePage {
     // Assign each point to a cluster based on grid cell height and width
     var count = 0;
     while (count < 10) {
-      console.log("doClusterer:: marker", markersData[count]);
+      console.log("doClusterer:: marker", markersData[count]);  // - FIXME: doesn't do anything.
       count++;
     }
 
