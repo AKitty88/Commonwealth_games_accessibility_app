@@ -231,7 +231,7 @@ export class HomePage {
         // })
         this.map.addMarker(markerOptions2)
           .then((marker: Marker) => {
-
+            this.markersArr.push(marker);    
 
 
             marker.on(GoogleMapsEvent.MARKER_CLICK)
@@ -245,7 +245,7 @@ export class HomePage {
                     
                     this.setMarkerConfig(marker, point);
                     this.getMarkerPosition(marker, point);  // - FIXME: function name getMarkerPosition doesn't illustrate the coded behaviour.
-
+                    console.log("Markers arr from subscribe click", this.markersArr);
 
                     // bloat test code
                     let markerOptions3: MarkerOptions = {
@@ -277,7 +277,7 @@ export class HomePage {
 
           }); // _.then
 
-
+        
       } // _FOR loop
 
 
@@ -357,13 +357,17 @@ export class HomePage {
 // - FIXME: function name getMarkerPosition doesn't illustrate the coded behaviour.
 
   getMarkerPosition(marker: Marker, point) {
-    this.map.fromLatLngToPoint(marker.getPosition()).then(
-      point => {
-        console.log("added marker at PIXEL POSITION: ", point[0], ",", point[1]);
-        var arrLength = this.markersArr.push(marker);         // debug
-        console.log("placedMarkersArray Length", arrLength, "array contents", this.markersArr);  // debug
 
+
+    this.map.fromLatLngToPoint(marker.getPosition())
+      .then( point => {
+        console.log("added marker at PIXEL POSITION: ", point[0], ",", point[1]);
+        //var arrLength = this.markersArr.push(marker);         // debug
+        var arrLength = this.markersArr.length;                 // debug
+        console.log("placedMarkersArray Length", arrLength, "array contents", this.markersArr);  // debug
       });
+
+        
   }
   // Helper function to scale proportions vs icon size ~~ // - FIXME: cleanup unused functions.
   getMapSizeDegrees(topLat, botLat, leftLong, rightLong) {
