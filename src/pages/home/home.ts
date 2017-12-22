@@ -19,10 +19,29 @@ import { Platform } from 'ionic-angular';
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController } from 'ionic-angular';
 
+
+// - TODO: move to export enums.ts file later
+/** 
+ * 
+ * To assist comprehension when using tuples or accessing an index for a point.
+*/
+enum GeoAxis {
+  long = 0,     // x
+  lat  = 1,     // y
+};
+enum CartesianAxis {
+  x = 0,        // verify standard order in functions?
+  y = 1       
+};
+
+//
+
+
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
+
 export class HomePage {
   @ViewChild('map') mapElement: ElementRef;
   map: GoogleMap;
@@ -251,17 +270,17 @@ export class HomePage {
                     
 
                     this.map.addMarker(markerOptions3)
-                      .then((marker2: Marker) => {
+                      .then((marker3: Marker) => {
 
-                        var diff = this.getMarkerPixelDistance(marker, marker2);
-                        let differ = Promise.resolve(diff);
-                        console.log("difference from marker is:", differ[0], differ[1]);      // am I breaking a promise? </3. Messy code with unresolved promises everywhere
+                        var diff = this.getMarkerPixelDistancePromise(marker, marker3);
+                        
+                        //let differ = Promise.resolve(diff);
+                        console.log("difference from marker3 is:", diff[0], diff[1]);      // am I breaking a promise? </3. Messy code with unresolved promises everywhere
                       
 
                       });
 
-                      
-                    // bloat test code end.
+                    //_ bloat test code end.
 
                   }) // _.then
 
@@ -407,11 +426,42 @@ export class HomePage {
     return (a > b) ? (a - b) : (b - a);                 // Math.abs might return incorrect results?
   }
 
-  getMarkerPixelDistance(marker1: Marker, marker2: Marker) {
-    // this.map.fromLatLngToPoint(marker1.getPosition()).then(point => {marker1.getPosition()
-    var diff = [-1, -1];                          // negative distance indicates error code.
+  // Helper function to return a tuple [x, y] that corresponds to the difference in pixel values of two points.
+  getDifferenceXY(pxPtA, pxPtB){
+    var ptDiffXY = [-1, -1];
 
-    this.map.fromLatLngToPoint(marker1.getPosition())
+    console.log("ptA", pxPtA, "ptB", pxPtB);
+    ptDiffXY[0] = this.getDifference(pxPtA[0], pxPtB[0]);
+    ptDiffXY[1] = this.getDifference(pxPtA[1], pxPtB[1]);
+
+    console.log("ptX diff is", ptDiffXY[0], "ptY diff is", ptDiffXY[1]);
+    
+    return ptDiffXY;
+  }
+
+
+  getMarkerPixelDistancePromise(marker1: Marker, marker2: Marker) {
+    // this.map.fromLatLngToPoint(marker1.getPosition()).then(point => {marker1.getPosition()
+    var diff = [-1, -1];                          // negative distance indicates error code.. not async
+    var getPxPtFromMarker1 = this.map.fromLatLngToPoint(marker1.getPosition());
+    var getPxPtFromMarker2 = this.map.fromLatLngToPoint(marker2.getPosition());
+
+    // -- test code -DELETEME:  test promise.all first. then return the promise after verifying it works.
+    Promise.all([getPxPtFromMarker1, getPxPtFromMarker2])
+      .then( points => this.getDifferenceXY(points[0], points[1])
+    );
+
+    
+    // return new Promise(function(resolve, reject) {
+    //   // var getPxPtFrommarker() = this.map.fromLatLngToPoint();
+
+
+
+    // })
+   
+    /*
+      return Promise.all
+      this.map.fromLatLngToPoint(marker1.getPosition())
       .then(pxPtA => {
 
 
@@ -423,13 +473,16 @@ export class HomePage {
             let diffY = this.getDifference(pxPtA[1], pxPtB[1]);
             console.log("Distance between Marker 1 and 2 =", diffX, diffY);
 
+
             diff = [diffX, diffY];                        // - COOL: tuples!
-            
+            return diff;
           });
 
-          return diff;
+          
       });
-      
+    
+    */
+
       // return diff;
   }
 
