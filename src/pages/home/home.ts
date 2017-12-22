@@ -190,21 +190,22 @@ export class HomePage {
             'id':           i
           })
 
+          /*
+            // Test code
+            var pt = this.map.fromLatLngToPoint(pos);
+            // pt.then(point => {
+            //   console.log(point[0], point[1], point, "lol");
+            // });
 
-          // Test code
-          var pt = this.map.fromLatLngToPoint(pos);
-          // pt.then(point => {
-          //   console.log(point[0], point[1], point, "lol");
-          // });
 
+            // console.log("test latlng to px point:", pt, pt[0], pt[1], pos);
+            var resolvedPointLat = pt.then(point => {
+              return point[0];
+            });
+            //Promise.resolve(resolvedPoint);
 
-          // console.log("test latlng to px point:", pt, pt[0], pt[1], pos);
-          var resolvedPointLat = pt.then(point => {
-            return point[0];
-          });
-          //Promise.resolve(resolvedPoint);
-
-          // console.log("resolved point lat is ", resolvedPointLat);
+            console.log("resolved point lat is ", resolvedPointLat);
+          */
         }
         // _ Test code fin.
 
@@ -256,10 +257,17 @@ export class HomePage {
                       disableAutoPan: true                          // disable auto centering onto the clicked marker.
                     }
                     
-
-                    this.map.addMarker(markerOptions3)
+                    let gridCellSize = {
+                      'pxWidth':  100,                                    // Placeholder values.
+                      'pxHeight': 100
+                    }
+                    let numCategories = 3;   
+                    this.doClusterer(markers, topLat, botLat, leftLong, rightLong, gridCellSize, numCategories); // - FIXME: Hardcoded numCategories to discern from the datasets given?
+                
+                    this.map.addMarker(markerOptions3)  // - FIXME: Dropping a marker on click to compare relative pixel distances.
                       .then((marker3: Marker) => {
 
+                        // - BUG: promised property undefined
                         var diff = this.getMarkerPixelDistancePromise(marker, marker3);
                         
                         //let differ = Promise.resolve(diff);
@@ -332,14 +340,10 @@ export class HomePage {
     //         //alert('clicked');
     //       });
     //   });
-    let gridCellSize = {
-      'pxWidth':  10,                                    // Placeholder values.
-      'pxHeight': 10
-    }
-    let numCategories = 3;                              // - FIXME: Hardcoded numCategories to discern from the datasets given?
-    console.log("loadMarkers:: markers added.");
-    this.doClusterer(markers, topLat, botLat, leftLong, rightLong, gridCellSize, numCategories);
 
+                           
+    console.log("loadMarkers:: markers added.");
+   
   } // _loadMarkers()
 
   // Assists debugging
@@ -354,8 +358,21 @@ export class HomePage {
     );
   }
 
-// - FIXME: function name getMarkerPosition doesn't illustrate the coded behaviour.
+  // Helper function to scale proportions vs icon size ~~ // - FIXME: cleanup unused functions.
+  //getMapSizeDegrees(topLat, botLat, leftLong, rightLong);//
+  getMapSizeDegrees(map: GoogleMap) {
+    var region = map.getVisibleRegion();
+    console.log("getMapSizeDegrees:: region is" + region);
 
+    var topLat = region.northeast.lat;
+    var botLat = region.southwest.lat;
+    var leftLong = region.southwest.lng;
+    var rightLong = region.northeast.lng;
+
+    return [topLat, botLat, leftLong, rightLong];
+  }
+
+// - FIXME: function name getMarkerPosition doesn't illustrate the coded behaviour.
   getMarkerPosition(marker: Marker, point) {
 
 
@@ -366,11 +383,6 @@ export class HomePage {
         var arrLength = this.markersArr.length;                 // debug
         console.log("placedMarkersArray Length", arrLength, "array contents", this.markersArr);  // debug
       });
-
-        
-  }
-  // Helper function to scale proportions vs icon size ~~ // - FIXME: cleanup unused functions.
-  getMapSizeDegrees(topLat, botLat, leftLong, rightLong) {
 
   }
 
@@ -406,8 +418,9 @@ export class HomePage {
     // just process data array to determine categories? data structures? pre-sort? count the distribution.
     //
     var clusters = [];
+
     console.log(Object.keys(markersData));
-    console.log("doClusterer:: markersData mm", markersData.pos );
+    console.log("doClusterer:: markersData mm", markersData[0].pos );
     //console.log("doClusterer:: markersData mzm", markersData[0].id );
     var testMarkerAccessInFunction = markersData.pop();   // undefined?
     console.log("doClusterer:: markersData pop", testMarkerAccessInFunction);
@@ -503,11 +516,12 @@ export class HomePage {
 
   // 
   cluster() {
-    // should take parameters for markers array, distance(cluster radius), zoom (map scale)
+    // should take parameters for markers array, distance(cluster radius), zoom (map scale), categories
+
     let zoom = 15;
     let distance = 200;                 // pixels.
     var markers   = [];
-    var clustered = [];
+    var clustered = [];                 // ? should multi-dimensional array based on category?
 
     // Compare markers
     while (markers.length > 0 ) {
