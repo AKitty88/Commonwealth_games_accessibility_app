@@ -82,8 +82,6 @@
     <allow-navigation href="http://10.246.115.218:8100" />
     <allow-navigation href="http://192.168.137.1:8100" />
     <allow-navigation href="http://10.246.115.218:8100" />
-    <engine name="android" spec="6.3.0" />
-    <engine name="ios" spec="4.5.4" />
     <plugin name="ionic-plugin-keyboard" spec="^2.2.1" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <plugin name="cordova-plugin-device" spec="^1.1.7" />
@@ -95,4 +93,6 @@
         <variable name="API_KEY_FOR_ANDROID" value="AIzaSyDFpfzphD451gTriAfBdOck3lIluvxv1bM" />
         <variable name="API_KEY_FOR_IOS" value="AIzaSyDU8b_dT9gf_Md1A1KHuB1CBtJpz5EYEs0" />
     </plugin>
+    <engine name="android" spec="6.3.0" />
+    <engine name="ios" spec="4.5.4" />
 </widget>
