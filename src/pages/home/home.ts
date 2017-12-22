@@ -232,13 +232,7 @@ export class HomePage {
         this.map.addMarker(markerOptions2)
           .then((marker: Marker) => {
 
-            this.map.fromLatLngToPoint(marker.getPosition()).then(
-              point => {
-                console.log("added marker at PIXEL POSITION: ", point[0], ",", point[1] );
-                var arrLength = this.markersArr.push(marker);         // debug
-                console.log("placedMarkersArray Length", arrLength);  // debug
 
-            });
 
             marker.on(GoogleMapsEvent.MARKER_CLICK)
               .subscribe(() => {
@@ -248,16 +242,10 @@ export class HomePage {
                 // the promised screen pixel values of lat lng
                 this.map.fromLatLngToPoint(marker.getPosition())
                   .then(point => {
+                    
+                    this.setMarkerConfig(marker, point);
+                    this.getMarkerPosition(marker, point);  // - FIXME: function name getMarkerPosition doesn't illustrate the coded behaviour.
 
-
-                    alert("Marker clicked title:" +
-                      marker.getTitle() + "\n" +
-                      marker.getPosition() + "\n" +
-                      " Promise pt " +
-                      point[0] +
-                      " " +
-                      point[1]
-                    );
 
                     // bloat test code
                     let markerOptions3: MarkerOptions = {
@@ -354,6 +342,29 @@ export class HomePage {
 
   } // _loadMarkers()
 
+  // Assists debugging
+  setMarkerConfig(marker: Marker, point) {
+    alert("Marker clicked title:" +
+      marker.getTitle() + "\n" +
+      marker.getPosition() + "\n" +
+      " Promise pt " +
+      point[0] +
+      " " +
+      point[1]
+    );
+  }
+
+// - FIXME: function name getMarkerPosition doesn't illustrate the coded behaviour.
+
+  getMarkerPosition(marker: Marker, point) {
+    this.map.fromLatLngToPoint(marker.getPosition()).then(
+      point => {
+        console.log("added marker at PIXEL POSITION: ", point[0], ",", point[1]);
+        var arrLength = this.markersArr.push(marker);         // debug
+        console.log("placedMarkersArray Length", arrLength, "array contents", this.markersArr);  // debug
+
+      });
+  }
   // Helper function to scale proportions vs icon size ~~ // - FIXME: cleanup unused functions.
   getMapSizeDegrees(topLat, botLat, leftLong, rightLong) {
 
