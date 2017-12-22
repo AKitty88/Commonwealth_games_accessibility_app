@@ -271,8 +271,13 @@ export class HomePage {
                         var diff = this.getMarkerPixelDistancePromise(marker, marker3);
                         
                         //let differ = Promise.resolve(diff);
-                        console.log("difference from marker3 is:", diff[0], diff[1]);      // am I breaking a promise? </3. Messy code with unresolved promises everywhere
-                      
+                        //console.log("difference from marker3 is:", diff[0], diff[1]);      // am I breaking a promise? </3. Messy code with unresolved promises everywhere
+                        console.log("Promise return attempt");
+                        diff.then( pointsDiffXY => {
+                          console.log("points diff click x:", pointsDiffXY[0], "y", pointsDiffXY[1]);
+                        });
+
+
 
                       });
 
@@ -468,21 +473,22 @@ export class HomePage {
   }
 
 
-  getMarkerPixelDistancePromise(marker1: Marker, marker2: Marker) {
+  getMarkerPixelDistancePromise(marker1: Marker, marker2: Marker): Promise<number[]> {
     // this.map.fromLatLngToPoint(marker1.getPosition()).then(point => {marker1.getPosition()
     var diff = [-1, -1];                          // negative distance indicates error code.. not async
     var getPxPtFromMarker1 = this.map.fromLatLngToPoint(marker1.getPosition());
     var getPxPtFromMarker2 = this.map.fromLatLngToPoint(marker2.getPosition());
 
-    // -- test code -DELETEME:  test promise.all first. then return the promise after verifying it works.
-    Promise.all([getPxPtFromMarker1, getPxPtFromMarker2])
-      .then( points => this.getDifferenceXY(points[0], points[1])
-    );
 
-    
+    // -- test code -DELETEME:  test promise.all first. then return the promise after verifying it works.
+    var promise = Promise.all([getPxPtFromMarker1, getPxPtFromMarker2])
+                    .then(points => this.getDifferenceXY(points[0], points[1])
+                  );
+
+    return promise;
+
     // return new Promise(function(resolve, reject) {
     //   // var getPxPtFrommarker() = this.map.fromLatLngToPoint();
-
 
 
     // })
