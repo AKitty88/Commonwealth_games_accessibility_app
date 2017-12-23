@@ -296,18 +296,37 @@ export class HomePage {
                               )
                               .then( prnt => {
                                   console.log("loadMarkers:: getPixDistanceMath", prnt);
+
+                                  console.log("screenheight:", screen.height);
+                                  // e.g. Marker -27.972352564267933, lng: 153.3951060846448}
+                                  // e.g. -27.95233889780934, lng: 153.38103018701077}
+                                  //let pxDistMath = this.getPixelDistance(-27.972352564267933, 153.3951060846448, -27.95233889780934, 153.38103018701077, 15);
+                                  var rad = function(x) {
+                                    return x * Math.PI / 180;
+                                  };
+                                  
+
+                                  var getDistance = function(p1, p2) {
+                                    var R = 6378137; // Earth’s mean radius in meter
+                                    var dLat = rad(p2.lat() - p1.lat());
+                                    var dLong = rad(p2.lng() - p1.lng());
+                                    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                                      Math.cos(rad(p1.lat())) * Math.cos(rad(p2.lat())) *
+                                      Math.sin(dLong / 2) * Math.sin(dLong / 2);
+                                    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                                    var d = R * c;
+                                    console.log("dddd ", d);
+                                    return d; // returns the distance in meter
+                                  };
+                                  console.log(getDistance);
+                                  // this.getMarkerPixelDistancePromise(marker, marker3);
+                                  
+                                  // let pxDistmath = this.getPixelDistance();
+                                  // console.log("loadMarkers:: pxDistMath", pxDistMath);
+
+                                  
                               }
                             );
-
-                            // e.g. Marker -27.972352564267933, lng: 153.3951060846448}
-                            // e.g. -27.95233889780934, lng: 153.38103018701077}
-                            //let pxDistMath = this.getPixelDistance(-27.972352564267933, 153.3951060846448, -27.95233889780934, 153.38103018701077, 15);
-                            
-
-                            // this.getMarkerPixelDistancePromise(marker, marker3);
-                            
-                            // let pxDistmath = this.getPixelDistance();
-                            // console.log("loadMarkers:: pxDistMath", pxDistMath);
 
 
                           });
