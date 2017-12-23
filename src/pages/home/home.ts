@@ -10,7 +10,8 @@ import {
   MarkerOptions,
   Marker,
   BaseArrayClass,
-  LatLng
+  LatLng,
+  LatLngBounds
 } from '@ionic-native/google-maps';
 
 
@@ -134,8 +135,12 @@ export class HomePage {
 
     //
     var region = this.map.getVisibleRegion();
-    console.log("region is" + region);
-    var topLat = region.northeast.lat;
+    console.log("loadMarkers::  region is" + region);
+    console.log("loadMarkers:: region farleft", region.farLeft, region.farRight, region.nearLeft, region.nearRight);
+    region.farLeft;
+
+    // LatLngBounds
+    var topLat = region.northeast.lat;      // .nearLeft and .farRight also for top-left, bottom-right of visible region.
     var botLat = region.southwest.lat;
     var leftLong = region.southwest.lng;
     var rightLong = region.northeast.lng;
@@ -210,7 +215,7 @@ export class HomePage {
         // _ Test code fin.
 
         if (parseInt(i) == data.length - 1)
-          console.log("byebye");                        // hello
+          console.log("loadMarkers:: byebye");                        // hello
 
       }
 
@@ -232,12 +237,16 @@ export class HomePage {
         // })
         this.map.addMarker(markerOptions2)
           .then((marker: Marker) => {
-            this.markersArr.push(marker);    
 
+
+            this.markersArr.push(marker);    
+            
 
             marker.on(GoogleMapsEvent.MARKER_CLICK)
               .subscribe(() => {
                 marker.showInfoWindow();
+
+
 
                 // Promise! moved alert inside the `promise.then` to take advantage of
                 // the promised screen pixel values of lat lng
@@ -246,7 +255,7 @@ export class HomePage {
                     
                     this.setMarkerConfig(marker, point);
                     this.getMarkerPosition(marker, point);  // - FIXME: function name getMarkerPosition doesn't illustrate the coded behaviour.
-                    console.log("Markers arr from subscribe click", this.markersArr);
+                    console.log("loadMarkers:: Markers arr from subscribe click", this.markersArr);
 
                     // bloat test code
                     let markerOptions3: MarkerOptions = {
@@ -263,28 +272,53 @@ export class HomePage {
                     }
                     let numCategories = 3;   
                     this.doClusterer(markers, topLat, botLat, leftLong, rightLong, gridCellSize, numCategories); // - FIXME: Hardcoded numCategories to discern from the datasets given?
-                
+
                     this.map.addMarker(markerOptions3)  // - FIXME: Dropping a marker on click to compare relative pixel distances.
                       .then((marker3: Marker) => {
 
                         // - BUG: promised property undefined
                         var diff = this.getMarkerPixelDistancePromise(marker, marker3);
-                        
+
                         //let differ = Promise.resolve(diff);
                         //console.log("difference from marker3 is:", diff[0], diff[1]);      // am I breaking a promise? </3. Messy code with unresolved promises everywhere
-                        console.log("Promise return attempt");
-                        diff.then( pointsDiffXY => {
-                          console.log("points diff click x:", pointsDiffXY[0], "y", pointsDiffXY[1]);
-                        });
+                        console.log("loadMarkers:: Promise return attempt");
+                        diff
+                          .then(pointsDiffXY => {
+                            console.log("loadMarkers:: points diff click x:", pointsDiffXY[0], "y", pointsDiffXY[1]);
 
 
+                            // test code mathemagic
+                            var aa1 = marker.getPosition();
+                            var bb2 = marker3.getPosition();
+
+                            var promise = Promise.all([aa1, bb2])
+                              .then(points => this.getPixelDistance(points[0].lat, points[0].lng, points[1].lat, points[1].lng, 15)
+                              )
+                              .then( prnt => {
+                                  console.log("loadMarkers:: getPixDistanceMath", prnt);
+                              }
+                            );
+
+                            // e.g. Marker -27.972352564267933, lng: 153.3951060846448}
+                            // e.g. -27.95233889780934, lng: 153.38103018701077}
+                            //let pxDistMath = this.getPixelDistance(-27.972352564267933, 153.3951060846448, -27.95233889780934, 153.38103018701077, 15);
+                            
+
+                            // this.getMarkerPixelDistancePromise(marker, marker3);
+                            
+                            // let pxDistmath = this.getPixelDistance();
+                            // console.log("loadMarkers:: pxDistMath", pxDistMath);
+
+
+                          });
+
+                        console.log("loadMarkers:: marker remove thing ", marker.remove());
 
                       });
 
                     //_ bloat test code end.
 
-                  }) // _.then
-
+                  }) // marker3 _.then
 
               }); // _.subscribe
 
@@ -322,7 +356,7 @@ export class HomePage {
       title: 'Commonwealth Games Village',
       snippet: "The Commonwealth Games Village (CGV) and the redevelopment of Parklands, Southport is one of the largest urban renewal projects ever undertaken on the Gold Coast.",
       icon: 'blue',
-      animation: 'DROP',
+      animation: 'bounce',
       position: {
         lat: -27.9623464,
         lng: 153.3880684
@@ -335,6 +369,7 @@ export class HomePage {
           //marker.showInfoWindow();
           alert('Marker clicked title:' + marker.getTitle());
         });
+
 
     });
 
@@ -391,9 +426,38 @@ export class HomePage {
 
   }
 
+
+  latToX(lat, offset, radius) {
+    return offset - radius * 
+      Math.log((1 + Math.sin(lat * Math.PI / 180)   /  
+               (1 - Math.sin(lat * Math.PI / 180))) / 2);
+  }
+  longToY(long, offset, radius) {
+
+    return (offset + radius * long * Math.PI / 180)
+  }
+
   // Helper function to get pixel distance of screen points.
-  getPixelDistance( /* lat1, long1, lat2, long2, zoom: number */) {
+  getPixelDistance( lat1, long1, lat2, long2, zoom: number) {
     //let pixels = this.map.fromLatLngToPoint(new LatLng(0, 0)); // get pixels from the topleft of the div.
+
+    // google maps zoom level numbers based on earth circumference.
+    // hard coded values for conversion. Pythagoras + Mercator mathemagic?
+    // 268435456 = half of the earth circumference in pixels at zoom level 21. 
+    const OFFSET = 268435456;     // - TODO: global define. - TODO: Move logic to data controller class.
+    const RADIUS = 85445659.4471  // offset / pi();
+
+    let x1 = this.latToX(lat1, OFFSET, RADIUS);
+    let y1 = this.longToY(long1, OFFSET, RADIUS);
+    let x2 = this.latToX(lat2, OFFSET, RADIUS);
+    let y2 = this.longToY(long1, OFFSET, RADIUS);
+    console.log("getPixelDistance:: Math:", x1, y1, x2, y2);
+    // pythag
+   
+
+    let dist = Math.sqrt( Math.pow((x1 - x2), 2) +  Math.pow((y1 - y2), 2) ) >> (21 - zoom);
+    console.log("getPixelDistance:: dist is", dist);
+    return dist;
 
   }
 
@@ -431,10 +495,11 @@ export class HomePage {
     console.log("doClusterer:: markersData pop", testMarkerAccessInFunction);
     // Assign each point to a cluster based on grid cell height and width
     var count = 0;
-    while (count < 10) {
+    console.log("doClusterer:: markersData count", markersData.length);
+    /*while (count < 10) {
       console.log("doClusterer:: marker", markersData[count]);  // - FIXME: doesn't do anything.
       count++;
-    }
+    }*/
 
 
 
