@@ -1,4 +1,6 @@
 import { jsonFileLoader } from './../../services/jsonFileLoader';
+
+// -TODO use component controller for ionic-native google maps cordova plugin.. and set map Clickable based on ion-menu ([)ionOpen) (ionClosed)
 import { GoogleMapsProvider } from './../../providers/google-maps/google-maps';
 
 import {
@@ -15,7 +17,7 @@ import {
 } from '@ionic-native/google-maps';
 
 
-import { Platform } from 'ionic-angular';
+import { Platform, Events } from 'ionic-angular';
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController } from 'ionic-angular';
@@ -27,7 +29,7 @@ import { NavController } from 'ionic-angular';
  * To assist comprehension when using tuples or accessing an index for a point.
 */
 enum GeoAxis {
-  long = 0,     // x
+  long = 0,     // x, should correspond to first element in the tuple.
   lat  = 1,     // y
 };
 enum CartesianAxis {
@@ -51,11 +53,23 @@ export class HomePage {
 
 
   // - DEPRECATED FIXED: `private _googleMaps: GoogleMaps` no longer needed in constructor
-  constructor(public navCtrl: NavController,
-    public platform: Platform,
-    public JsonFileLoader: jsonFileLoader) {
-    //
-    console.log("Constructed");
+  constructor(public navCtrl:         NavController,
+              public platform:        Platform,
+              private events:         Events,
+              public JsonFileLoader:  jsonFileLoader) {
+
+    
+    // Fix #15 by tracking status of ionic side menu presentation and disable overriding click behaviour caused by `cordova-plugin-googlemaps` container.
+    console.log("HomePage::Constructed");
+    this.events.subscribe("app::menuOpened", () => {
+      this.map.setClickable(false);
+      console.log("HomePage:: menuOpened event");
+    });
+    this.events.subscribe("app::menuClosed", () => {
+      this.map.setClickable(true);
+      console.log("HomePage:: menuClosed event");
+    });
+
   }
 
   // - FIXME: ngAfterViewInit() vs ionViewDidLoad()
@@ -104,7 +118,7 @@ export class HomePage {
 
         // Populate the map view
         this.loadMarkers();
-      })
+      });
 
 
     /*
@@ -145,6 +159,23 @@ export class HomePage {
     var leftLong = region.southwest.lng;
     var rightLong = region.northeast.lng;
     console.log("Screenbounds: topLat botLat leftLong rightLong", topLat, botLat, leftLong, rightLong);
+    let mapSpanXConvert = this.map.fromLatLngToPoint(region.nearLeft); // y e.g. [0, 528]
+    let mapSpanYConvert = this.map.fromLatLngToPoint(region.farRight); // x e.g. [328, 0]
+    Promise.all([mapSpanXConvert, mapSpanYConvert])
+      .then(spans => {
+        let mapSpanX = spans[0][1];
+        let mapSpanY = spans[1][0];
+        
+        console.log("Screenbounds: Pixels: mapSpanX, mapSpanY", mapSpanX, mapSpanY);
+        let mapSpanLong = this.getDifference(leftLong, rightLong);
+        let mapSpanLat  = this.getDifference(topLat, botLat);
+        console.log("Screenbounds MapSpanLatLong::", mapSpanLong, mapSpanLat);
+        let pixelSpanX = mapSpanLong / mapSpanX;
+        let pixelSpanY = mapSpanLat / mapSpanY;
+        console.log("Screenbound pixelSpan::", pixelSpanX, pixelSpanY);
+      });
+
+
     let pos: LatLng = new LatLng(0, 0);
     var markers = [];
 
@@ -405,6 +436,23 @@ export class HomePage {
    
   } // _loadMarkers()
 
+  // - MARK: Event functions
+  // menuOpened and menuClosed to fix bug of cordova google maps overriding clickable elements from the background depending on fullscreen layout and menuType..
+  // menuOpened() {
+  //   this.map.one(GoogleMapsEvent.MAP_READY)
+  //     .then(() => {
+  //       this.map.setClickable(false);
+  //       console.log("menuOpened:: map setClickable false");
+  //     });
+  // }
+  // menuClosed() {
+  //   this.map.one(GoogleMapsEvent.MAP_READY)
+  //   .then(() => {
+  //     this.map.setClickable(true);
+  //     console.log("menuOpened:: map setClickable true");
+  //   });
+  // }
+
   // Assists debugging
   setMarkerConfig(marker: Marker, point) {
     alert("Marker clicked title:" +
@@ -446,17 +494,18 @@ export class HomePage {
   }
 
 
-  latToX(lat, offset, radius) {
+  longToX(lat, offset, radius) {
     return offset - radius * 
       Math.log((1 + Math.sin(lat * Math.PI / 180)   /  
                (1 - Math.sin(lat * Math.PI / 180))) / 2);
   }
-  longToY(long, offset, radius) {
+  latToY(long, offset, radius) {
 
     return (offset + radius * long * Math.PI / 180)
   }
 
   // Helper function to get pixel distance of screen points.
+  // FIXME: Difference of x 15.75 and y 1.25 gets a pixel distance 25???.
   getPixelDistance( lat1, long1, lat2, long2, zoom: number) {
     //let pixels = this.map.fromLatLngToPoint(new LatLng(0, 0)); // get pixels from the topleft of the div.
 
@@ -466,14 +515,15 @@ export class HomePage {
     const OFFSET = 268435456;     // - TODO: global define. - TODO: Move logic to data controller class.
     const RADIUS = 85445659.4471  // offset / pi();
 
-    let x1 = this.latToX(lat1, OFFSET, RADIUS);
-    let y1 = this.longToY(long1, OFFSET, RADIUS);
-    let x2 = this.latToX(lat2, OFFSET, RADIUS);
-    let y2 = this.longToY(long1, OFFSET, RADIUS);
-    console.log("getPixelDistance:: Math:", x1, y1, x2, y2);
+    let x1 = this.longToX(long1, OFFSET, RADIUS);
+    let y1 = this.latToY(lat1, OFFSET, RADIUS);
+    let x2 = this.longToX(long2, OFFSET, RADIUS);
+    let y2 = this.latToY(lat2, OFFSET, RADIUS);
+    console.log("getPixelDistance:: Math: x1 y1 x2 y2", x1, y1, x2, y2);
     // pythag
    
 
+    // - TODO: resolve bit-shift vs powers of two faster operation?
     let dist = Math.sqrt( Math.pow((x1 - x2), 2) +  Math.pow((y1 - y2), 2) ) >> (21 - zoom);
     console.log("getPixelDistance:: dist is", dist);
     return dist;
