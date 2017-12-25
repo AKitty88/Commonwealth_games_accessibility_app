@@ -147,11 +147,7 @@ export class HomePage {
         //   'pos':          pos,
         //   'category':     1,
         //   'parkingType':  "Fatality",                   // -FIXME: for parking only. normalisation or restructure functions.
-<<<<<<< HEAD
         //   'close':        [],                           // @TSulli123 -close? to resolve clustering? for markers that are close together?                
-=======
-        //   'close':        [],                           // @TSulli123 -close? to resolve clustering?
->>>>>>> 1b9f990bdad977333708936055831b5026528bed
         //   'added':        false,
         //   'id':           i
         // })
@@ -216,15 +212,9 @@ export class HomePage {
         // })
         this.map.addMarker(markerOptions2)
           .then((marker: Marker) => {
-<<<<<<< HEAD
             
             this.map.fromLatLngToPoint(marker.getPosition()).then( 
               point => { 
-=======
-
-            this.map.fromLatLngToPoint(marker.getPosition()).then(
-              point => {
->>>>>>> 1b9f990bdad977333708936055831b5026528bed
                 console.log("added marker at PIXEL POSITION: ", point[0], ",", point[1] );
                 var arrLength = this.markersArr.push(marker);         // debug
                 console.log("placedMarkersArray Length", arrLength);  // debug
