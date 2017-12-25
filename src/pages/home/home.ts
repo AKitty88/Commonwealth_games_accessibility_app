@@ -150,7 +150,7 @@ export class HomePage {
     //
     var region = this.map.getVisibleRegion();
     console.log("loadMarkers::  region is" + region);
-    console.log("loadMarkers:: region farleft", region.farLeft, region.farRight, region.nearLeft, region.nearRight);
+    console.log("loadMarkers:: region farleft", region.farLeft[0], region.farRight, region.nearLeft, region.nearRight);
 
     // LatLngBounds
     var topLat = region.northeast.lat;      // .nearLeft and .farRight also for top-left, bottom-right of visible region.
@@ -159,8 +159,8 @@ export class HomePage {
     var rightLong = region.northeast.lng;
     console.log("Screenbounds: topLat botLat leftLong rightLong", topLat, botLat, leftLong, rightLong);
 
-    this.getPixelSpanFromMap(this.map);
-
+    var pixelSpan = this.getPixelSpanFromMap(this.map);
+    console.log("loadMarkers:: pixelSpan", pixelSpan);
     let pos: LatLng = new LatLng(0, 0);
     var markers = [];
 
@@ -333,7 +333,7 @@ export class HomePage {
                                     console.log("dddd ", d);
                                     return d; // returns the distance in meter
                                   };
-                                  console.log(getDistance);
+                                  console.log("getDistanacecz", getDistance);
                                   // this.getMarkerPixelDistancePromise(marker, marker3);
                                   
                                   // let pxDistmath = this.getPixelDistance();
@@ -475,7 +475,8 @@ export class HomePage {
         let pixelSpanY = mapSpanLat / mapSpanY;
         console.log("Screenbound pixelSpan::X Y", pixelSpanX, pixelSpanY);
 
-
+        let pixelSpanXY = [pixelSpanX, pixelSpanY];
+        return pixelSpanXY;
       });
 
 
