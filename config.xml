@@ -3,7 +3,7 @@
     <name>Access-GC-2.0</name>
     <description>An awesome Ionic/Cordova app.</description>
     <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
-    <content src="index.html" />
+    <content original-src="index.html" src="http://192.168.0.2:8100" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -80,6 +80,8 @@
     <allow-navigation href="http://192.168.43.208:8100" />
     <allow-navigation href="http://192.168.137.1:8100" />
     <allow-navigation href="http://10.246.115.218:8100" />
+    <allow-navigation href="http://192.168.137.1:8100" />
+    <allow-navigation href="http://10.246.115.218:8100" />
     <engine name="android" spec="6.3.0" />
     <engine name="ios" spec="4.5.4" />
     <plugin name="ionic-plugin-keyboard" spec="^2.2.1" />
@@ -88,12 +90,11 @@
     <plugin name="cordova-plugin-splashscreen" spec="^4.1.0" />
     <plugin name="cordova-plugin-ionic-webview" spec="^1.1.16" />
     <plugin name="cordova-plugin-geolocation" spec="^3.0.0" />
-    <plugin name="cordova-plugin-statusbar" spec="^2.3.0" />
-    <allow-navigation href="http://192.168.137.1:8100" />
-    <allow-navigation href="http://10.246.115.218:8100" />
-    <engine name="android" spec="~6.3.0" />
-    <plugin name="cordova-plugin-googlemaps" spec="https://github.com/mapsplugin/cordova-plugin-googlemaps#multiple_maps">
+    <plugin name="cordova-plugin-statusbar" spec="^2.4.0" />
+    <plugin name="cordova-plugin-googlemaps" spec="git+https://github.com/mapsplugin/cordova-plugin-googlemaps.git#multiple_maps">
         <variable name="API_KEY_FOR_ANDROID" value="AIzaSyDFpfzphD451gTriAfBdOck3lIluvxv1bM" />
         <variable name="API_KEY_FOR_IOS" value="AIzaSyDU8b_dT9gf_Md1A1KHuB1CBtJpz5EYEs0" />
+        <variable name="LOCATION_WHEN_IN_USE_DESCRIPTION" value="Show your location on the map" />
+        <variable name="LOCATION_ALWAYS_USAGE_DESCRIPTION" value="Trace your location on the map" />
     </plugin>
 </widget>

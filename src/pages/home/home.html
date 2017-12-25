@@ -1,36 +1,47 @@
-<ion-header>
-  <ion-navbar>
+<ion-header no-border>
+  <ion-navbar transparent>
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>Home</ion-title>
   </ion-navbar>
 </ion-header>
+<ion-content fullscreen class="no-header">
+  <!-- <h3>Ionic Map Test</h3> -->
 
-<ion-content padding>
-  <h3>Ionic Map Test</h3>
-<div #map id="map" style="height:100%"> </div>
-  <p>
+  <div #map id="map" style="height: 100%; 
+                         ">
+    <!-- FAB buttons -->
+    <!-- <ion-fab top left> 
+  <button ion-fab>Menu</button>
+</ion-fab> -->
+    <!-- - TODO: Replace with icons and provision click events. -UI Designer? -->
+    <ion-fab top left>
+      <button ion-fab menuToggle>
+        <ion-icon name="menu"></ion-icon>
+      </button>
+    </ion-fab>
+    <ion-fab middle right>
+
+      <button ion-fab mini>+</button>
+      <ion-fab-list side="top">
+        <button ion-fab>a</button>
+        <button ion-fab>b</button>
+        <button ion-fab>c</button>
+      </ion-fab-list>
+      <ion-fab-list side="left">
+        <button ion-fab>--</button>
+      </ion-fab-list>
+    </ion-fab>
+
+  </div>
+
+
+  <!-- <p>
     If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will show you the way.
-  </p>
+  </p> -->
 <!-- - TODO: Replace menu/header with floating buttons based on UI revisions -->
   <button ion-button secondary menuToggle>Toggle Menu</button>
 
-<!-- FAB buttons -->
-<!-- <ion-fab top left> 
-  <button ion-fab>Menu</button>
-</ion-fab> -->
-<ion-fab top right >
-
-  <button ion-fab mini>+</button>
-  <ion-fab-list side="top">
-    <button ion-fab>a</button>
-    <button ion-fab>b</button>
-    <button ion-fab>c</button>
-  </ion-fab-list>
-  <ion-fab-list side="left">
-    <button ion-fab>--</button>
-  </ion-fab-list>
-</ion-fab>
 
 </ion-content>
