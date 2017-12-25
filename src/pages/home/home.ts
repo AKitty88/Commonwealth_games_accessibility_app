@@ -151,7 +151,6 @@ export class HomePage {
     var region = this.map.getVisibleRegion();
     console.log("loadMarkers::  region is" + region);
     console.log("loadMarkers:: region farleft", region.farLeft, region.farRight, region.nearLeft, region.nearRight);
-    region.farLeft;
 
     // LatLngBounds
     var topLat = region.northeast.lat;      // .nearLeft and .farRight also for top-left, bottom-right of visible region.
@@ -159,22 +158,8 @@ export class HomePage {
     var leftLong = region.southwest.lng;
     var rightLong = region.northeast.lng;
     console.log("Screenbounds: topLat botLat leftLong rightLong", topLat, botLat, leftLong, rightLong);
-    let mapSpanXConvert = this.map.fromLatLngToPoint(region.nearLeft); // y e.g. [0, 528]
-    let mapSpanYConvert = this.map.fromLatLngToPoint(region.farRight); // x e.g. [328, 0]
-    Promise.all([mapSpanXConvert, mapSpanYConvert])
-      .then(spans => {
-        let mapSpanX = spans[0][1];
-        let mapSpanY = spans[1][0];
-        
-        console.log("Screenbounds: Pixels: mapSpanX, mapSpanY", mapSpanX, mapSpanY);
-        let mapSpanLong = this.getDifference(leftLong, rightLong);
-        let mapSpanLat  = this.getDifference(topLat, botLat);
-        console.log("Screenbounds MapSpanLatLong::", mapSpanLong, mapSpanLat);
-        let pixelSpanX = mapSpanLong / mapSpanX;
-        let pixelSpanY = mapSpanLat / mapSpanY;
-        console.log("Screenbound pixelSpan::", pixelSpanX, pixelSpanY);
-      });
 
+    this.getPixelSpanFromMap(this.map);
 
     let pos: LatLng = new LatLng(0, 0);
     var markers = [];
@@ -287,7 +272,7 @@ export class HomePage {
                     this.getMarkerPosition(marker, point);  // - FIXME: function name getMarkerPosition doesn't illustrate the coded behaviour.
                     console.log("loadMarkers:: Markers arr from subscribe click", this.markersArr);
 
-                    // bloat test code
+                    // bloat test code 
                     let markerOptions3: MarkerOptions = {
                       position: markers[0].pos,
                       title:    markers[0].parkingType,             // - JOKE: non-fatal title name now.
@@ -464,6 +449,37 @@ export class HomePage {
     );
   }
 
+  // - MARK: Map helpers
+  // @param: map for map conversion functions and region bounds.
+  getPixelSpanFromMap(map: GoogleMap) {
+    let region = map.getVisibleRegion();
+
+    // LatLngBounds
+    var topLat = region.northeast.lat;      // .nearLeft and .farRight also for top-left, bottom-right of visible region.
+    var botLat = region.southwest.lat;
+    var leftLong = region.southwest.lng;
+    var rightLong = region.northeast.lng;
+
+    let mapSpanXConvert = map.fromLatLngToPoint(region.nearLeft); // y e.g. [0, 528]
+    let mapSpanYConvert = map.fromLatLngToPoint(region.farRight); // x e.g. [328, 0]
+    Promise.all([mapSpanXConvert, mapSpanYConvert])
+      .then(spans => {
+        let mapSpanX = spans[0][1];
+        let mapSpanY = spans[1][0];
+        
+        console.log("Screenbounds: Pixels: mapSpanX, mapSpanY", mapSpanX, mapSpanY);
+        let mapSpanLong = this.getDifference(leftLong, rightLong);
+        let mapSpanLat  = this.getDifference(topLat, botLat);
+        console.log("Screenbounds MapSpanLatLong::", mapSpanLong, mapSpanLat);
+        let pixelSpanX = mapSpanLong / mapSpanX;
+        let pixelSpanY = mapSpanLat / mapSpanY;
+        console.log("Screenbound pixelSpan::X Y", pixelSpanX, pixelSpanY);
+
+
+      });
+
+
+  }
   // Helper function to scale proportions vs icon size ~~ // - FIXME: cleanup unused functions.
   //getMapSizeDegrees(topLat, botLat, leftLong, rightLong);//
   getMapSizeDegrees(map: GoogleMap) {
@@ -658,12 +674,24 @@ export class HomePage {
     // should take parameters for markers array, distance(cluster radius), zoom (map scale), categories
 
     let zoom = 15;
-    let distance = 200;                 // pixels.
+    let distance = 80;                 // pixels.
     var markers   = [];
     var clustered = [];                 // ? should multi-dimensional array based on category?
 
+    // Cook Cl
+    //-27.969021, 153.382553
+    //-27.969076, 153.38263
+
+    let ptsLatDiff = this.getDifference(-27.969021, -21.969076);
+    let ptsLongDif = this.getDifference(153.382553, 153.38263);
+
+    console.log("cluster::", ptsLatDiff, ptsLongDif);
+
+    let ptsLatToX
+
+    // out of cluster is -27.972198, 153.384456
     // Compare markers
-    while (markers.length > 0 ) {
+    while (markers.length > 0 ) { // does .length update on pop? ono.
 
       var marker = markers.pop;
       var cluster = [];

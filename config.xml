@@ -3,7 +3,7 @@
     <name>Access-GC-2.0</name>
     <description>An awesome Ionic/Cordova app.</description>
     <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
-    <content original-src="index.html" src="http://192.168.0.2:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -82,8 +82,7 @@
     <allow-navigation href="http://10.246.115.218:8100" />
     <allow-navigation href="http://192.168.137.1:8100" />
     <allow-navigation href="http://10.246.115.218:8100" />
-    <engine name="android" spec="6.3.0" />
-    <engine name="ios" spec="4.5.4" />
+    <allow-navigation href="http://192.168.0.24:8100" />
     <plugin name="ionic-plugin-keyboard" spec="^2.2.1" />
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <plugin name="cordova-plugin-device" spec="^1.1.7" />
@@ -97,4 +96,6 @@
         <variable name="LOCATION_WHEN_IN_USE_DESCRIPTION" value="Show your location on the map" />
         <variable name="LOCATION_ALWAYS_USAGE_DESCRIPTION" value="Trace your location on the map" />
     </plugin>
+    <engine name="android" spec="6.3.0" />
+    <engine name="ios" spec="4.5.4" />
 </widget>
