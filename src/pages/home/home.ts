@@ -11,9 +11,12 @@ import {
   CameraPosition,
   MarkerOptions,
   Marker,
+  Polygon,
+  PolygonOptions,
   BaseArrayClass,
   LatLng,
-  LatLngBounds
+  LatLngBounds,
+
 } from '@ionic-native/google-maps';
 
 
@@ -24,8 +27,8 @@ import { NavController } from 'ionic-angular';
 
 
 // - TODO: move to export enums.ts file later
-/** 
- * 
+/**
+ *
  * To assist comprehension when using tuples or accessing an index for a point.
 */
 enum GeoAxis {
@@ -34,7 +37,7 @@ enum GeoAxis {
 };
 enum CartesianAxis {
   x = 0,        // verify standard order in functions?
-  y = 1       
+  y = 1
 };
 
 //
@@ -58,7 +61,7 @@ export class HomePage {
               private events:         Events,
               public JsonFileLoader:  jsonFileLoader) {
 
-    
+
     // Fix #15 by tracking status of ionic side menu presentation and disable overriding click behaviour caused by `cordova-plugin-googlemaps` container.
     console.log("HomePage::Constructed");
     this.events.subscribe("app::menuOpened", () => {
@@ -168,15 +171,23 @@ export class HomePage {
     this.JsonFileLoader.getData().subscribe((data) => {
 
       data = data.features;
+
       for (let i in data) {
         // console.log(data[i].geometry.coordinates[0]);
-        var count = 0;
+
+        // console.log("Test 02/01 - 4: ", data[i]);
+        // console.log("Test 02/01 - 5: ", data[i].poly);
+        let polygon= data[i].poly;
+        PolygonOptions polyOptions = new PolygonOptions(polygon);//.addAll(polygon);//.strokeColor(Color.RED).fillColor(Color.BLUE);
+        //Polygon poly = this.map.addPolygon(polyOptions);
+
+        var count = 0;  	         // instead of 0
         var lat = 0;
         var long = 0;
-        for (let j in data[i].geometry.coordinates[0]) {
+        for (let j in data[i].poly) {
           count++;
-          long  += data[i].geometry.coordinates[0][j][0];   // TSulli123 resolved the polygon coords long lat into the average centre for marker placement.
-          lat   += data[i].geometry.coordinates[0][j][1];
+          long  += data[i].poly[j][0];   // TSulli123 resolved the polygon coords long lat into the average centre for marker placement.
+          lat   += data[i].poly[j][1];
         }
         lat = lat / count;
         long = long / count;
@@ -187,7 +198,7 @@ export class HomePage {
         //   'pos':          pos,
         //   'category':     1,
         //   'parkingType':  "Fatality",                   // -FIXME: for parking only. normalisation or restructure functions.
-        //   'close':        [],                           // @TSulli123 -close? to resolve clustering? for markers that are close together?                
+        //   'close':        [],                           // @TSulli123 -close? to resolve clustering? for markers that are close together?
         //   'added':        false,
         //   'id':           i
         // })
@@ -232,12 +243,11 @@ export class HomePage {
 
         if (parseInt(i) == data.length - 1)
           console.log("loadMarkers:: byebye");                        // hello
-
       }
 
       for (let i in markers) {                          // From previous screenbounds If-statement latlng validation, markers should contain
 
-        
+
         let markerOptions2: MarkerOptions = {
           position: markers[i].pos,
           title:    markers[i].parkingType,             // - JOKE: non-fatal title name now.
@@ -254,8 +264,8 @@ export class HomePage {
         this.map.addMarker(markerOptions2)
           .then((marker: Marker) => {
 
-            this.markersArr.push(marker);    
-            
+            this.markersArr.push(marker);
+
 
             marker.on(GoogleMapsEvent.MARKER_CLICK)
               .subscribe(() => {
@@ -267,12 +277,12 @@ export class HomePage {
                 // the promised screen pixel values of lat lng
                 this.map.fromLatLngToPoint(marker.getPosition())
                   .then(point => {
-                    
+
                     this.setMarkerConfig(marker, point);
                     this.getMarkerPosition(marker, point);  // - FIXME: function name getMarkerPosition doesn't illustrate the coded behaviour.
                     console.log("loadMarkers:: Markers arr from subscribe click", this.markersArr);
 
-                    // bloat test code 
+                    // bloat test code
                     let markerOptions3: MarkerOptions = {
                       position: markers[0].pos,
                       title:    markers[0].parkingType,             // - JOKE: non-fatal title name now.
@@ -280,12 +290,12 @@ export class HomePage {
                       animation:"DROP",
                       disableAutoPan: true                          // disable auto centering onto the clicked marker.
                     }
-                    
+
                     let gridCellSize = {
                       'pxWidth':  100,                                    // Placeholder values.
                       'pxHeight': 100
                     }
-                    let numCategories = 3;   
+                    let numCategories = 3;
                     this.doClusterer(markers, topLat, botLat, leftLong, rightLong, gridCellSize, numCategories); // - FIXME: Hardcoded numCategories to discern from the datasets given?
 
                     this.map.addMarker(markerOptions3)  // - FIXME: Dropping a marker on click to compare relative pixel distances.
@@ -319,7 +329,7 @@ export class HomePage {
                                   var rad = function(x) {
                                     return x * Math.PI / 180;
                                   };
-                                  
+
 
                                   var getDistance = function(p1, p2) {
                                     var R = 6378137; // Earth’s mean radius in meter
@@ -335,11 +345,11 @@ export class HomePage {
                                   };
                                   console.log("getDistanacecz", getDistance);
                                   // this.getMarkerPixelDistancePromise(marker, marker3);
-                                  
+
                                   // let pxDistmath = this.getPixelDistance();
                                   // console.log("loadMarkers:: pxDistMath", pxDistMath);
 
-                                  
+
                               }
                             );
 
@@ -350,6 +360,19 @@ export class HomePage {
 
                       });
 
+                      /* let latLng= new LatLng();
+
+                      PolylineOptions rectOptions = new PolylineOptions()
+                        .add(new LatLng(37.35, -122.0))
+                        .add(new LatLng(37.45, -122.0))  // North of the previous point, but at the same longitude
+                        .add(new LatLng(37.45, -122.2))  // Same latitude, and 30km to the west
+                        .add(new LatLng(37.35, -122.2))  // Same longitude, and 16km to the south
+                        .add(new LatLng(37.35, -122.0)); // Closes the polyline.
+
+
+
+                      this.map. */
+
                     //_ bloat test code end.
 
                   }) // marker3 _.then
@@ -358,7 +381,7 @@ export class HomePage {
 
           }); // _.then
 
-        
+
       } // _FOR loop
 
 
@@ -415,9 +438,9 @@ export class HomePage {
     //       });
     //   });
 
-                           
+
     console.log("loadMarkers:: markers added.");
-   
+
   } // _loadMarkers()
 
   // - MARK: Event functions
@@ -466,7 +489,7 @@ export class HomePage {
       .then(spans => {
         let mapSpanX = spans[0][1];
         let mapSpanY = spans[1][0];
-        
+
         console.log("Screenbounds: Pixels: mapSpanX, mapSpanY", mapSpanX, mapSpanY);
         let mapSpanLong = this.getDifference(leftLong, rightLong);
         let mapSpanLat  = this.getDifference(topLat, botLat);
@@ -511,8 +534,8 @@ export class HomePage {
 
 
   longToX(lat, offset, radius) {
-    return offset - radius * 
-      Math.log((1 + Math.sin(lat * Math.PI / 180)   /  
+    return offset - radius *
+      Math.log((1 + Math.sin(lat * Math.PI / 180)   /
                (1 - Math.sin(lat * Math.PI / 180))) / 2);
   }
   latToY(long, offset, radius) {
@@ -527,7 +550,7 @@ export class HomePage {
 
     // google maps zoom level numbers based on earth circumference.
     // hard coded values for conversion. Pythagoras + Mercator mathemagic?
-    // 268435456 = half of the earth circumference in pixels at zoom level 21. 
+    // 268435456 = half of the earth circumference in pixels at zoom level 21.
     const OFFSET = 268435456;     // - TODO: global define. - TODO: Move logic to data controller class.
     const RADIUS = 85445659.4471  // offset / pi();
 
@@ -537,7 +560,7 @@ export class HomePage {
     let y2 = this.latToY(lat2, OFFSET, RADIUS);
     console.log("getPixelDistance:: Math: x1 y1 x2 y2", x1, y1, x2, y2);
     // pythag
-   
+
 
     // - TODO: resolve bit-shift vs powers of two faster operation?
     let dist = Math.sqrt( Math.pow((x1 - x2), 2) +  Math.pow((y1 - y2), 2) ) >> (21 - zoom);
@@ -618,7 +641,7 @@ export class HomePage {
     ptDiffXY[1] = this.getDifference(pxPtA[1], pxPtB[1]);
 
     console.log("ptX diff is", ptDiffXY[0], "ptY diff is", ptDiffXY[1]);
-    
+
     return ptDiffXY;
   }
 
@@ -642,7 +665,7 @@ export class HomePage {
 
 
     // })
-   
+
     /*
       return Promise.all
       this.map.fromLatLngToPoint(marker1.getPosition())
@@ -662,15 +685,15 @@ export class HomePage {
             return diff;
           });
 
-          
+
       });
-    
+
     */
 
       // return diff;
   }
 
-  // 
+  //
   cluster() {
     // should take parameters for markers array, distance(cluster radius), zoom (map scale), categories
 
@@ -696,7 +719,7 @@ export class HomePage {
 
       var marker = markers.pop;
       var cluster = [];
-      
+
       for (let i in markers) {
         var pixels = 1;
       }
