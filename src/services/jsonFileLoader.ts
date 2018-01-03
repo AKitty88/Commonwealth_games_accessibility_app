@@ -8,7 +8,7 @@ export class jsonFileLoader {
 	constructor(public http: Http) { }
 
 	getData() {
-		return this.http.get("assets/data/data.json")
+		return this.http.get("assets/data/ParkingData.json")
 			.map((res: Response) => res.json()); //records in this case
 	}
 
