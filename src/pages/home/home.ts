@@ -174,12 +174,7 @@ export class HomePage {
 
       for (let i in data) {
         // console.log(data[i].geometry.coordinates[0]);
-
-        // console.log("Test 02/01 - 4: ", data[i]);
-        // console.log("Test 02/01 - 5: ", data[i].poly);
         let polygon= data[i].poly;
-        PolygonOptions polyOptions = new PolygonOptions(polygon);//.addAll(polygon);//.strokeColor(Color.RED).fillColor(Color.BLUE);
-        //Polygon poly = this.map.addPolygon(polyOptions);
 
         var count = 0;  	         // instead of 0
         var lat = 0;
