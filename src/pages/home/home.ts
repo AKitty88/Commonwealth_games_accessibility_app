@@ -178,30 +178,28 @@ export class HomePage {
     var markers = [];
 
     // - TODO: Faster performance by pre-sorting the data?
-    this.JsonFileLoader.getData().subscribe((data) => {
+    this.JsonFileLoader.getData().subscribe((ParkingData) => {
 
-      data = data.features;
+      ParkingData = ParkingData.features;
 
-      for (let i in data) {
+      for (let i in ParkingData) {
         // console.log(data[i].geometry.coordinates[0]);
 
-        let polygon= data[i].poly;              // getting the array containing the polygon coordinates from the JSON file (Kitti)
-        let polygon_coords= [new LatLng(polygon[0][0], polygon[0][1]), new LatLng(polygon[1][0], polygon[1][1]), new LatLng(polygon[2][0], polygon[2][1]),        // creating an array with the coordinates of a polygon (Kitti)
-                            new LatLng(polygon[3][0], polygon[3][1]), new LatLng(polygon[4][0], polygon[4][1])];
+        let polygon= ParkingData[i].poly;              // getting the array containing the polygon coordinates from the JSON file (Kitti)
+        //let polygon_coords= [new LatLng(polygon[0][0], polygon[0][1]), new LatLng(polygon[1][0], polygon[1][1]), new LatLng(polygon[2][0], polygon[2][1]),
+                            //new LatLng(polygon[3][0], polygon[3][1]), new LatLng(polygon[4][0], polygon[4][1])];
 
+        let polygon_coords= [];
+        polygon_coords.push(new LatLng(polygon[i][0], polygon[i][1]));          // creating an array with the coordinates of a polygon (Kitti)
         this.createPolygon(polygon_coords);
 
         var count = 0;  	         // instead of 0
         var lat = 0;
         var long = 0;
-        for (let j in data[i].poly) {
-          count++;
-          long  += data[i].poly[j][0];   // TSulli123 resolved the polygon coords long lat into the average centre for marker placement.
-          lat   += data[i].poly[j][1];
+        for (let j in ParkingData[i].poly) {
+          lat = ParkingData[i].avgLat;
+          long = ParkingData[i].avgLng;
         }
-        lat = lat / count;
-        long = long / count;
-
 
         // Oops.
         // markers.push({
@@ -221,7 +219,7 @@ export class HomePage {
           lat >= botLat &&
           lat <= topLat) {
           let pos: LatLng = new LatLng(lat, long);
-          let parkingType = data[i].properties.CLASS    // e.g. On-/Off-street
+          let parkingType = ParkingData[i].properties.CLASS    // e.g. On-/Off-street
           //console.log("marker puuuush ----)");
           markers.push({                                // See above marker description.
             'pos':          pos,                        // point of Lat Lng
@@ -251,12 +249,11 @@ export class HomePage {
         }
         // _ Test code fin.
 
-        if (parseInt(i) == data.length - 1)
+        if (parseInt(i) == ParkingData.length - 1)
           console.log("loadMarkers:: byebye");                        // hello
       }
 
       for (let i in markers) {                          // From previous screenbounds If-statement latlng validation, markers should contain
-
 
         let markerOptions2: MarkerOptions = {
           position: markers[i].pos,
