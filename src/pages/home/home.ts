@@ -15,8 +15,7 @@ import {
   PolygonOptions,
   BaseArrayClass,
   LatLng,
-  LatLngBounds,
-
+  LatLngBounds
 } from '@ionic-native/google-maps';
 
 
@@ -146,11 +145,22 @@ export class HomePage {
 
   }
 
+  // adds a polygon to the map (Kitti)
+  createPolygon(coordinates: LatLng[]){
+    let polygOptions: PolygonOptions = {
+      points: coordinates,
+      strokeColor: '#e60000',
+      strokeWidth: 3,
+      visible: true
+    };
+
+    this.map.addPolygon(polygOptions);
+  }
+
   loadMarkers() {
     console.log("loadMarkers:: ");
     // const locations: any[] = this.dummyData();
 
-    //
     var region = this.map.getVisibleRegion();
     console.log("loadMarkers::  region is" + region);
     console.log("loadMarkers:: region farleft", region.farLeft[0], region.farRight, region.nearLeft, region.nearRight);
@@ -175,9 +185,11 @@ export class HomePage {
       for (let i in data) {
         // console.log(data[i].geometry.coordinates[0]);
 
-        let polygon= data[i].poly;
-        PolygonOptions polyOptions = new PolygonOptions().addAll(polygon).strokeColor(Color.RED).fillColor(Color.BLUE);
-        Polygon poly = this.map.addPolygon(polyOptions);
+        let polygon= data[i].poly;              // getting the array containing the polygon coordinates from the JSON file (Kitti)
+        let polygon_coords= [new LatLng(polygon[0][0], polygon[0][1]), new LatLng(polygon[1][0], polygon[1][1]), new LatLng(polygon[2][0], polygon[2][1]),        // creating an array with the coordinates of a polygon (Kitti)
+                            new LatLng(polygon[3][0], polygon[3][1]), new LatLng(polygon[4][0], polygon[4][1])];
+
+        this.createPolygon(polygon_coords);
 
         var count = 0;  	         // instead of 0
         var lat = 0;
