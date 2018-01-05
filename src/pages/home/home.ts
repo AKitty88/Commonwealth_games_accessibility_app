@@ -186,20 +186,18 @@ export class HomePage {
         // console.log(data[i].geometry.coordinates[0]);
 
         let polygon= ParkingData[i].poly;              // getting the array containing the polygon coordinates from the JSON file (Kitti)
-        //let polygon_coords= [new LatLng(polygon[0][0], polygon[0][1]), new LatLng(polygon[1][0], polygon[1][1]), new LatLng(polygon[2][0], polygon[2][1]),
-                            //new LatLng(polygon[3][0], polygon[3][1]), new LatLng(polygon[4][0], polygon[4][1])];
-
         let polygon_coords= [];
-        polygon_coords.push(new LatLng(polygon[i][0], polygon[i][1]));          // creating an array with the coordinates of a polygon (Kitti)
-        this.createPolygon(polygon_coords);
 
-        var count = 0;  	         // instead of 0
+        var count = 0;
         var lat = 0;
         var long = 0;
+
         for (let j in ParkingData[i].poly) {
-          lat = ParkingData[i].avgLat;
-          long = ParkingData[i].avgLng;
+          polygon_coords.push(new LatLng(polygon[j][0], polygon[j][1]));          // creating an array with the coordinates of a polygon (Kitti)
         }
+        lat = ParkingData[i].avgLat;
+        long = ParkingData[i].avgLng;
+        this.createPolygon(polygon_coords);
 
         // Oops.
         // markers.push({
@@ -251,9 +249,13 @@ export class HomePage {
 
         if (parseInt(i) == ParkingData.length - 1)
           console.log("loadMarkers:: byebye");                        // hello
-      }
+      }.then(console.log("markers: ", markers);)         // test 05.01
+
+
 
       for (let i in markers) {                          // From previous screenbounds If-statement latlng validation, markers should contain
+        console.log("i: ", i);                     // test 05.01
+        console.log("markers in for: ", markers);         // test 05.01
 
         let markerOptions2: MarkerOptions = {
           position: markers[i].pos,
