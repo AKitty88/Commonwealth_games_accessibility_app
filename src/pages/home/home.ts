@@ -195,7 +195,7 @@ export class HomePage {
         for (let j in ParkingData[i].poly) {
           polygon_coords.push(new LatLng(polygon[j][0], polygon[j][1]));          // creating an array with the coordinates of a polygon (Kitti)
         }
-        lat = ParkingData[i].avgLat;
+        lat = ParkingData[i].avgLat;                                              // getting the average lat and long values (Kitti)
         long = ParkingData[i].avgLng;
         this.createPolygon(polygon_coords);
 
@@ -249,13 +249,9 @@ export class HomePage {
 
         if (parseInt(i) == ParkingData.length - 1)
           console.log("loadMarkers:: byebye");                        // hello
-      }.then(console.log("markers: ", markers);)         // test 05.01
-
-
+      }
 
       for (let i in markers) {                          // From previous screenbounds If-statement latlng validation, markers should contain
-        console.log("i: ", i);                     // test 05.01
-        console.log("markers in for: ", markers);         // test 05.01
 
         let markerOptions2: MarkerOptions = {
           position: markers[i].pos,
